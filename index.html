@@ -554,6 +554,22 @@
             }
         }
 
+        @keyframes cardPulse {
+            0% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1.02);
+            }
+            100% {
+                transform: scale(1);
+            }
+        }
+
+        .set-card.updating {
+            animation: cardPulse 0.4s ease-out !important;
+        }
+
         @media (max-width: 768px) {
             header h1 {
                 font-size: 2.3em;
@@ -783,6 +799,12 @@
         let allSets = [];
         let debounceTimer;
 
+        // Validate image URL
+        function isValidImageUrl(url) {
+            if (!url || typeof url !== 'string') return false;
+            return url.startsWith('http');
+        }
+
         // Fetch all Pokemon sets from TCG API
         async function fetchPokemons() {
             try {
@@ -792,6 +814,7 @@
                 allSets = (data.data || []).filter(set => 
                     set.images && 
                     set.images.logo && 
+                    isValidImageUrl(set.images.logo) &&
                     set.name && 
                     set.printedTotal !== undefined
                 );
@@ -818,7 +841,9 @@
                 const series = (set.series || '').toLowerCase();
                 
                 return (name.startsWith(query) || series.startsWith(query)) &&
-                       set.images.logo;
+                       set.images && 
+                       set.images.logo &&
+                       isValidImageUrl(set.images.logo);
             }).slice(0, 8); // Show top 8 results
 
             if (filtered.length === 0) {
@@ -902,10 +927,13 @@
                 
                 const card = document.createElement('div');
                 card.className = 'set-card';
+                card.dataset.setName = setName;
                 
-                const imageHTML = image ? 
-                    `<img src="${image}" alt="${setName}" class="set-image" onerror="this.parentElement.innerHTML='<div class=\\'set-image-placeholder\\'>🎴</div>'">` :
-                    `<div class="set-image-placeholder">🎴</div>`;
+                let imageHTML = `<div class="set-image-placeholder">🎴</div>`;
+                
+                if (image) {
+                    imageHTML = `<img src="${image}" alt="${setName}" class="set-image" onerror="this.parentElement.innerHTML='<div class=\\'set-image-placeholder\\'>🎴</div>'">`;
+                }
                 
                 card.innerHTML = `
                     <div class="set-image-container">${imageHTML}</div>
@@ -957,6 +985,17 @@
                 sets[setName].count = (sets[setName].count || 0) + 1;
                 saveSets(sets);
                 render();
+                
+                // Add pulse animation to just this card
+                setTimeout(() => {
+                    const cards = document.querySelectorAll('.set-card');
+                    cards.forEach(card => {
+                        if (card.dataset.setName === setName) {
+                            card.classList.add('updating');
+                            setTimeout(() => card.classList.remove('updating'), 400);
+                        }
+                    });
+                }, 0);
             }
         }
 
