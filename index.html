@@ -984,18 +984,41 @@
             if (sets[setName] !== undefined) {
                 sets[setName].count = (sets[setName].count || 0) + 1;
                 saveSets(sets);
-                render();
                 
-                // Add pulse animation to just this card
-                setTimeout(() => {
-                    const cards = document.querySelectorAll('.set-card');
-                    cards.forEach(card => {
-                        if (card.dataset.setName === setName) {
-                            card.classList.add('updating');
-                            setTimeout(() => card.classList.remove('updating'), 400);
+                // Find the card and update only the count, no full re-render
+                const cards = document.querySelectorAll('.set-card');
+                let found = false;
+                cards.forEach(card => {
+                    if (card.dataset.setName === setName) {
+                        found = true;
+                        // Update total
+                        const total = Object.values(sets).reduce((sum, item) => sum + (item.count || 0), 0);
+                        document.getElementById('totalCount').textContent = total;
+                        
+                        // Update count in this card only
+                        const countElement = card.querySelector('.set-count');
+                        if (countElement) {
+                            countElement.textContent = sets[setName].count;
+                            
+                            // Add animation
+                            countElement.style.animation = 'none';
+                            setTimeout(() => {
+                                countElement.style.animation = 'countBounce 0.4s ease-out';
+                            }, 10);
                         }
-                    });
-                }, 0);
+                        
+                        // Pulse the card
+                        card.style.animation = 'none';
+                        setTimeout(() => {
+                            card.style.animation = 'cardPulse 0.3s ease-out';
+                        }, 10);
+                    }
+                });
+                
+                // Only render if card wasn't found (new set added through other means)
+                if (!found) {
+                    render();
+                }
             }
         }
 
