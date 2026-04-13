@@ -210,15 +210,15 @@
 
         .sets-container {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-            gap: 30px;
+            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+            gap: 20px;
             margin-bottom: 50px;
         }
 
         .set-card {
             background: linear-gradient(135deg, #1e1e3f 0%, #2d2d5f 100%);
             border-radius: 20px;
-            padding: 35px;
+            padding: 18px;
             box-shadow: 
                 0 15px 35px rgba(0, 0, 0, 0.4),
                 0 0 20px rgba(255, 215, 0, 0.1),
@@ -241,13 +241,13 @@
 
         .set-image-container {
             width: 100%;
-            height: 180px;
+            height: 130px;
             background: rgba(255, 215, 0, 0.1);
             border-radius: 12px;
             display: flex;
             align-items: center;
             justify-content: center;
-            margin-bottom: 20px;
+            margin-bottom: 12px;
             overflow: hidden;
             position: relative;
             z-index: 1;
@@ -272,9 +272,9 @@
         }
 
         .set-name {
-            font-size: 1.6em;
+            font-size: 1.3em;
             font-weight: 800;
-            margin-bottom: 20px;
+            margin-bottom: 10px;
             color: #ffd700;
             text-transform: uppercase;
             letter-spacing: 1px;
@@ -283,14 +283,14 @@
         }
 
         .set-count {
-            font-size: 4.5em;
+            font-size: 3.2em;
             font-weight: 900;
             text-align: center;
-            margin: 30px 0;
+            margin: 12px 0;
             color: #fff;
             background: linear-gradient(135deg, rgba(255, 215, 0, 0.15) 0%, rgba(255, 105, 53, 0.1) 100%);
-            padding: 30px;
-            border-radius: 15px;
+            padding: 15px;
+            border-radius: 12px;
             position: relative;
             z-index: 1;
             text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
@@ -298,8 +298,8 @@
 
         .set-actions {
             display: flex;
-            gap: 12px;
-            margin-top: 25px;
+            gap: 8px;
+            margin-top: 12px;
             position: relative;
             z-index: 1;
         }
@@ -308,10 +308,10 @@
         .btn-decrement,
         .btn-delete {
             border: none;
-            border-radius: 12px;
+            border-radius: 10px;
             cursor: pointer;
             font-weight: 700;
-            font-size: 1.3em;
+            font-size: 1.1em;
             transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
             position: relative;
             overflow: hidden;
@@ -320,7 +320,7 @@
         .btn-increment,
         .btn-decrement {
             flex: 1;
-            padding: 15px;
+            padding: 10px;
             color: #fff;
         }
 
@@ -349,9 +349,9 @@
         .btn-delete {
             background: linear-gradient(135deg, #8b5cf6 0%, #6d28d9 100%);
             color: #fff;
-            padding: 10px 16px;
-            font-size: 0.95em;
-            flex: 0.6;
+            padding: 8px 10px;
+            font-size: 0.8em;
+            flex: 0.5;
             box-shadow: 0 8px 20px rgba(139, 92, 246, 0.3);
         }
 
@@ -578,8 +578,8 @@
             }
 
             .sets-container {
-                grid-template-columns: 1fr;
-                gap: 20px;
+                grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+                gap: 15px;
             }
 
             .input-group {
@@ -588,18 +588,18 @@
             }
 
             .set-card {
-                padding: 20px;
+                padding: 15px;
             }
 
             .set-count {
-                font-size: 3.5em;
-                padding: 20px;
-                margin: 15px 0;
+                font-size: 2.8em;
+                padding: 12px;
+                margin: 10px 0;
             }
 
             .set-image-container {
-                height: 150px;
-                margin-bottom: 15px;
+                height: 110px;
+                margin-bottom: 10px;
             }
 
             .set-image-placeholder {
@@ -607,22 +607,24 @@
             }
 
             .set-name {
-                font-size: 1.3em;
+                font-size: 1.1em;
+                margin-bottom: 8px;
             }
 
             .btn-increment,
             .btn-decrement {
-                padding: 12px;
-                font-size: 1.1em;
+                padding: 10px;
+                font-size: 1em;
             }
 
             .btn-delete {
-                padding: 10px 12px;
-                font-size: 0.85em;
+                padding: 8px 8px;
+                font-size: 0.75em;
             }
 
             .set-actions {
-                gap: 8px;
+                gap: 6px;
+                margin-top: 10px;
             }
 
             .btn {
@@ -676,43 +678,44 @@
             }
 
             .set-card {
-                padding: 15px;
+                padding: 12px;
                 border-radius: 15px;
             }
 
             .set-name {
-                font-size: 1.1em;
-                margin-bottom: 10px;
+                font-size: 0.95em;
+                margin-bottom: 8px;
             }
 
             .set-count {
-                font-size: 2.8em;
-                padding: 15px;
-                margin: 12px 0;
+                font-size: 2.3em;
+                padding: 10px;
+                margin: 8px 0;
             }
 
             .set-image-container {
-                height: 120px;
-                margin-bottom: 12px;
+                height: 100px;
+                margin-bottom: 8px;
             }
 
             .set-actions {
-                gap: 6px;
+                gap: 5px;
+                margin-top: 8px;
             }
 
             .btn-increment,
             .btn-decrement {
-                padding: 10px;
-                font-size: 1em;
+                padding: 8px;
+                font-size: 0.95em;
             }
 
             .set-actions-secondary {
-                margin-top: 10px;
+                margin-top: 8px;
             }
 
             .btn-delete {
-                padding: 8px 10px;
-                font-size: 0.8em;
+                padding: 7px 8px;
+                font-size: 0.7em;
                 flex: 1;
             }
 
