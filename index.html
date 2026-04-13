@@ -142,6 +142,13 @@
             animation: fadeIn 1.2s ease-out;
         }
 
+        .controls-row {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
         .btn {
             padding: 15px 32px;
             border: none;
@@ -465,6 +472,227 @@
         .suggestion-code {
             color: rgba(255, 215, 0, 0.6);
             font-size: 0.85em;
+        }
+
+        /* Leaderboard Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 2000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            animation: fadeIn 0.3s ease-out;
+        }
+
+        .modal.active {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-content {
+            background: linear-gradient(135deg, #1e1e3f 0%, #2d2d5f 100%);
+            border-radius: 25px;
+            padding: 40px;
+            max-width: 500px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.7);
+            border: 2px solid rgba(255, 215, 0, 0.2);
+            animation: slideUp 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+        }
+
+        .modal-header h2 {
+            color: #ffd700;
+            font-size: 1.8em;
+            margin: 0;
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            color: #ffd700;
+            font-size: 2em;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .close-btn:hover {
+            color: #ffed4e;
+            transform: scale(1.2);
+        }
+
+        .leaderboard-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-bottom: 25px;
+        }
+
+        .leaderboard-item {
+            background: linear-gradient(135deg, rgba(255, 215, 0, 0.1) 0%, rgba(255, 105, 53, 0.1) 100%);
+            border: 2px solid rgba(255, 215, 0, 0.2);
+            border-radius: 12px;
+            padding: 15px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            transition: all 0.3s ease;
+        }
+
+        .leaderboard-item:hover {
+            background: linear-gradient(135deg, rgba(255, 215, 0, 0.2) 0%, rgba(255, 105, 53, 0.15) 100%);
+            border-color: rgba(255, 215, 0, 0.4);
+            transform: translateX(5px);
+        }
+
+        .leaderboard-rank {
+            font-size: 1.5em;
+            font-weight: 900;
+            min-width: 40px;
+            text-align: center;
+        }
+
+        .leaderboard-rank.first {
+            color: #ffd700;
+        }
+
+        .leaderboard-rank.second {
+            color: #c0c0c0;
+        }
+
+        .leaderboard-rank.third {
+            color: #cd7f32;
+        }
+
+        .leaderboard-info {
+            flex: 1;
+        }
+
+        .leaderboard-name {
+            font-size: 1.1em;
+            font-weight: 700;
+            color: #fff;
+        }
+
+        .leaderboard-count {
+            font-size: 0.9em;
+            color: rgba(255, 215, 0, 0.8);
+        }
+
+        .leaderboard-packs {
+            font-size: 1.8em;
+            font-weight: 900;
+            color: #ffd700;
+            text-align: right;
+        }
+
+        .add-friend-form {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .add-friend-form input {
+            flex: 1;
+            padding: 12px;
+            border: 2px solid rgba(255, 215, 0, 0.2);
+            border-radius: 10px;
+            background: rgba(255, 215, 0, 0.05);
+            color: #fff;
+            font-size: 1em;
+        }
+
+        .add-friend-form input::placeholder {
+            color: rgba(255, 215, 0, 0.4);
+        }
+
+        .add-friend-form input:focus {
+            outline: none;
+            border-color: #ffd700;
+            background: rgba(255, 215, 0, 0.1);
+        }
+
+        .share-stats-form {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .share-stats-form input {
+            flex: 1;
+            padding: 12px;
+            border: 2px solid rgba(255, 215, 0, 0.2);
+            border-radius: 10px;
+            background: rgba(255, 215, 0, 0.05);
+            color: #fff;
+            font-size: 0.95em;
+            word-break: break-all;
+        }
+
+        .copy-btn {
+            padding: 12px 20px;
+            background: linear-gradient(135deg, #04d361 0%, #00c94f 100%);
+            color: #fff;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: 700;
+            transition: all 0.3s ease;
+        }
+
+        .copy-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(4, 211, 97, 0.4);
+        }
+
+        .empty-leaderboard {
+            text-align: center;
+            padding: 30px 20px;
+            color: rgba(255, 215, 0, 0.6);
+        }
+
+        .modal-tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            border-bottom: 2px solid rgba(255, 215, 0, 0.1);
+        }
+
+        .modal-tab-btn {
+            flex: 1;
+            padding: 12px;
+            background: none;
+            border: none;
+            color: rgba(255, 215, 0, 0.6);
+            font-weight: 700;
+            cursor: pointer;
+            border-bottom: 3px solid transparent;
+            transition: all 0.3s ease;
+        }
+
+        .modal-tab-btn.active {
+            color: #ffd700;
+            border-bottom-color: #ffd700;
+        }
+
+        .modal-tab {
+            display: none;
+        }
+
+        .modal-tab.active {
+            display: block;
         }
 
         .empty-state {
@@ -794,7 +1022,10 @@
                 </div>
                 <button class="btn btn-primary" onclick="addSet()" style="flex: 0 0 auto;">+ Add</button>
             </div>
-            <button class="btn btn-secondary" onclick="resetAll()">Reset All</button>
+            <div class="controls-row">
+                <button class="btn btn-secondary" onclick="resetAll()">Reset All</button>
+                <button class="btn btn-primary" onclick="openLeaderboard()">🏆 Leaderboard</button>
+            </div>
         </div>
 
         <div class="sets-container" id="setsContainer">
@@ -804,7 +1035,39 @@
         </div>
     </div>
 
-    <script>
+    <!-- Leaderboard Modal -->
+    <div id="leaderboardModal" class="modal" onclick="if(event.target.id === 'leaderboardModal') closeLeaderboard()">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>🏆 Leaderboard</h2>
+                <button class="close-btn" onclick="closeLeaderboard()">×</button>
+            </div>
+
+            <div class="modal-tabs">
+                <button class="modal-tab-btn active" onclick="switchTab('leaderboard')">Leaderboard</button>
+                <button class="modal-tab-btn" onclick="switchTab('share')">Share Stats</button>
+            </div>
+
+            <!-- Leaderboard Tab -->
+            <div id="leaderboardTab" class="modal-tab active">
+                <div class="add-friend-form">
+                    <input type="text" id="friendShareCode" placeholder="Paste friend's share code or name">
+                    <button class="btn btn-primary" onclick="addFriend()" style="flex: 0 0 auto; padding: 12px 20px;">Add</button>
+                </div>
+                <div id="leaderboardList" class="leaderboard-list"></div>
+            </div>
+
+            <!-- Share Stats Tab -->
+            <div id="shareTab" class="modal-tab">
+                <p style="color: rgba(255, 215, 0, 0.8); margin-bottom: 15px; text-align: center;">Share your stats with friends!</p>
+                <div class="share-stats-form">
+                    <input type="text" id="shareLink" readonly placeholder="Your share link will appear here">
+                    <button class="copy-btn" onclick="copyShareLink()">Copy</button>
+                </div>
+                <p style="color: rgba(255, 215, 0, 0.6); font-size: 0.9em; text-align: center;">Share this link with friends to let them add you to their leaderboard.</p>
+            </div>
+        </div>
+    </div>
         const STORAGE_KEY = 'pokemonSets';
         const TCG_API = 'https://api.pokemontcg.io/v2/sets';
         let allSets = [];
@@ -1091,7 +1354,215 @@
             if (e.key === 'Enter') addSet();
         });
 
+        // ===== LEADERBOARD & SHARING FUNCTIONS =====
+        
+        const FRIENDS_KEY = 'pokemonFriends';
+        const USER_ID_KEY = 'pokemonUserId';
+
+        // Generate unique user ID
+        function getOrCreateUserId() {
+            let userId = localStorage.getItem(USER_ID_KEY);
+            if (!userId) {
+                userId = 'user_' + Math.random().toString(36).substr(2, 9);
+                localStorage.setItem(USER_ID_KEY, userId);
+            }
+            return userId;
+        }
+
+        // Get user name (can be customized)
+        function getUserName() {
+            return localStorage.getItem('pokemonUserName') || 'You';
+        }
+
+        // Load friends from localStorage
+        function loadFriends() {
+            const saved = localStorage.getItem(FRIENDS_KEY);
+            return saved ? JSON.parse(saved) : [];
+        }
+
+        // Save friends to localStorage
+        function saveFriends(friends) {
+            localStorage.setItem(FRIENDS_KEY, JSON.stringify(friends));
+        }
+
+        // Generate shareable link
+        function generateShareLink() {
+            const userId = getOrCreateUserId();
+            const baseUrl = window.location.origin + window.location.pathname;
+            return baseUrl + '?friend=' + userId;
+        }
+
+        // Get stats for leaderboard
+        function getStats(friendData = null) {
+            if (friendData) {
+                return friendData.stats;
+            }
+            const sets = loadSets();
+            const total = Object.values(sets).reduce((sum, item) => sum + (item.count || 0), 0);
+            return {
+                total: total,
+                setCount: Object.keys(sets).length,
+                mostOpenedSet: Object.entries(sets).sort((a, b) => (b[1].count || 0) - (a[1].count || 0))[0]?.[0] || 'None'
+            };
+        }
+
+        // Add friend to leaderboard
+        function addFriend() {
+            const input = document.getElementById('friendShareCode').value.trim();
+            if (!input) {
+                alert('Please enter a friend code or name');
+                return;
+            }
+
+            const friends = loadFriends();
+            
+            // Check if already added
+            if (friends.some(f => f.id === input || f.name === input)) {
+                alert('This friend is already on your leaderboard!');
+                return;
+            }
+
+            // Add friend
+            friends.push({
+                id: input,
+                name: input,
+                stats: { total: 0, setCount: 0 },
+                dateAdded: new Date().toISOString()
+            });
+
+            saveFriends(friends);
+            document.getElementById('friendShareCode').value = '';
+            renderLeaderboard();
+        }
+
+        // Remove friend from leaderboard
+        function removeFriend(friendId) {
+            if (confirm('Remove this friend from your leaderboard?')) {
+                let friends = loadFriends();
+                friends = friends.filter(f => f.id !== friendId);
+                saveFriends(friends);
+                renderLeaderboard();
+            }
+        }
+
+        // Render leaderboard
+        function renderLeaderboard() {
+            const friends = loadFriends();
+            const container = document.getElementById('leaderboardList');
+            const userId = getOrCreateUserId();
+
+            // Get your stats
+            const yourStats = getStats();
+            const leaderboard = [
+                {
+                    id: userId,
+                    name: getUserName(),
+                    stats: yourStats,
+                    isYou: true
+                },
+                ...friends.map(f => ({
+                    ...f,
+                    isYou: false
+                }))
+            ];
+
+            // Sort by total packs
+            leaderboard.sort((a, b) => (b.stats.total || 0) - (a.stats.total || 0));
+
+            if (leaderboard.length === 1) {
+                container.innerHTML = '<div class="empty-leaderboard">Invite a friend to start competing! 🎉</div>';
+                return;
+            }
+
+            container.innerHTML = leaderboard.map((person, index) => {
+                let medal = '👤';
+                if (index === 0) medal = '🥇';
+                else if (index === 1) medal = '🥈';
+                else if (index === 2) medal = '🥉';
+
+                const rankClass = index === 0 ? 'first' : index === 1 ? 'second' : index === 2 ? 'third' : '';
+
+                return `
+                    <div class="leaderboard-item">
+                        <div class="leaderboard-rank ${rankClass}">${medal}</div>
+                        <div class="leaderboard-info">
+                            <div class="leaderboard-name">${person.name}${person.isYou ? ' (You)' : ''}</div>
+                            <div class="leaderboard-count">${person.stats.setCount || 0} sets tracked</div>
+                        </div>
+                        <div class="leaderboard-packs">${person.stats.total || 0}</div>
+                        ${!person.isYou ? `<button class="btn-delete" onclick="removeFriend('${person.id}')">✕</button>` : ''}
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // Copy share link
+        function copyShareLink() {
+            const shareLink = generateShareLink();
+            document.getElementById('shareLink').value = shareLink;
+            
+            navigator.clipboard.writeText(shareLink).then(() => {
+                const btn = event.target;
+                const originalText = btn.textContent;
+                btn.textContent = 'Copied! ✓';
+                setTimeout(() => {
+                    btn.textContent = originalText;
+                }, 2000);
+            }).catch(() => {
+                alert('Copy failed. Link: ' + shareLink);
+            });
+        }
+
+        // Open leaderboard modal
+        function openLeaderboard() {
+            document.getElementById('leaderboardModal').classList.add('active');
+            document.getElementById('shareLink').value = generateShareLink();
+            renderLeaderboard();
+        }
+
+        // Close leaderboard modal
+        function closeLeaderboard() {
+            document.getElementById('leaderboardModal').classList.remove('active');
+        }
+
+        // Switch tabs in modal
+        function switchTab(tabName) {
+            // Hide all tabs
+            document.querySelectorAll('.modal-tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            document.querySelectorAll('.modal-tab-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+
+            // Show selected tab
+            document.getElementById(tabName + 'Tab').classList.add('active');
+            event.target.classList.add('active');
+        }
+
+        // Check URL for friend share code
+        function checkFriendShare() {
+            const params = new URLSearchParams(window.location.search);
+            const friendCode = params.get('friend');
+            if (friendCode) {
+                const friends = loadFriends();
+                if (!friends.some(f => f.id === friendCode)) {
+                    friends.push({
+                        id: friendCode,
+                        name: friendCode,
+                        stats: { total: 0, setCount: 0 },
+                        dateAdded: new Date().toISOString()
+                    });
+                    saveFriends(friends);
+                    alert('Friend added to your leaderboard! 🎉');
+                }
+                // Clean URL
+                window.history.replaceState({}, document.title, window.location.pathname);
+            }
+        }
+
         // Initialize
+        checkFriendShare();
         fetchPokemons().then(() => render());
     </script>
 </body>
