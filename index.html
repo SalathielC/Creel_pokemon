@@ -230,21 +230,6 @@
             overflow: hidden;
         }
 
-        .set-card::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: -100%;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255, 215, 0, 0.1), transparent);
-            transition: left 0.5s ease;
-        }
-
-        .set-card:hover::before {
-            left: 100%;
-        }
-
         .set-card:hover {
             transform: translateY(-8px);
             box-shadow: 
@@ -252,6 +237,38 @@
                 0 0 40px rgba(255, 215, 0, 0.25),
                 inset 0 1px 0 rgba(255, 255, 255, 0.15);
             border-color: rgba(255, 215, 0, 0.3);
+        }
+
+        .set-image-container {
+            width: 100%;
+            height: 180px;
+            background: rgba(255, 215, 0, 0.1);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 20px;
+            overflow: hidden;
+            position: relative;
+            z-index: 1;
+        }
+
+        .set-image {
+            max-width: 100%;
+            max-height: 100%;
+            width: auto;
+            height: auto;
+            object-fit: contain;
+        }
+
+        .set-image-placeholder {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, rgba(255, 215, 0, 0.1) 0%, rgba(255, 105, 53, 0.1) 100%);
+            font-size: 3em;
         }
 
         .set-name {
@@ -383,6 +400,62 @@
                 inset 0 1px 0 rgba(255, 255, 255, 0.1);
         }
 
+        .suggestions-dropdown {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: linear-gradient(135deg, #1e1e3f 0%, #2d2d5f 100%);
+            border: 2px solid rgba(255, 215, 0, 0.2);
+            border-top: none;
+            border-radius: 0 0 12px 12px;
+            max-height: 300px;
+            overflow-y: auto;
+            z-index: 1000;
+            display: none;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+        }
+
+        .suggestions-dropdown.active {
+            display: block;
+        }
+
+        .suggestion-item {
+            padding: 12px 16px;
+            color: #fff;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            border-bottom: 1px solid rgba(255, 215, 0, 0.1);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .suggestion-item:last-child {
+            border-bottom: none;
+        }
+
+        .suggestion-item:hover {
+            background: rgba(255, 215, 0, 0.15);
+            padding-left: 20px;
+        }
+
+        .suggestion-item img {
+            width: 40px;
+            height: 40px;
+            object-fit: contain;
+            border-radius: 4px;
+        }
+
+        .suggestion-text {
+            flex: 1;
+        }
+
+        .suggestion-code {
+            color: rgba(255, 215, 0, 0.6);
+            font-size: 0.85em;
+        }
+
         .empty-state {
             text-align: center;
             padding: 80px 20px;
@@ -487,6 +560,10 @@
                 letter-spacing: 2px;
             }
 
+            header p {
+                font-size: 1em;
+            }
+
             .total-counter {
                 padding: 35px 30px;
                 margin-bottom: 35px;
@@ -496,6 +573,10 @@
                 font-size: 3.8em;
             }
 
+            .total-counter h2 {
+                font-size: 1em;
+            }
+
             .sets-container {
                 grid-template-columns: 1fr;
                 gap: 20px;
@@ -503,15 +584,156 @@
 
             .input-group {
                 flex-direction: column;
+                gap: 8px;
             }
 
             .set-card {
-                padding: 25px;
+                padding: 20px;
             }
 
             .set-count {
                 font-size: 3.5em;
                 padding: 20px;
+                margin: 15px 0;
+            }
+
+            .set-image-container {
+                height: 150px;
+                margin-bottom: 15px;
+            }
+
+            .set-image-placeholder {
+                font-size: 2em;
+            }
+
+            .set-name {
+                font-size: 1.3em;
+            }
+
+            .btn-increment,
+            .btn-decrement {
+                padding: 12px;
+                font-size: 1.1em;
+            }
+
+            .btn-delete {
+                padding: 10px 12px;
+                font-size: 0.85em;
+            }
+
+            .set-actions {
+                gap: 8px;
+            }
+
+            .btn {
+                padding: 12px 20px;
+                font-size: 0.9em;
+                letter-spacing: 1px;
+            }
+
+            .controls {
+                flex-direction: column;
+                gap: 10px;
+            }
+
+            input[type="text"] {
+                padding: 14px 16px;
+                font-size: 16px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            header h1 {
+                font-size: 1.8em;
+                letter-spacing: 1px;
+                margin-bottom: 5px;
+            }
+
+            header p {
+                font-size: 0.95em;
+            }
+
+            .total-counter {
+                padding: 25px 20px;
+                margin-bottom: 25px;
+            }
+
+            .total-counter h2 {
+                font-size: 0.9em;
+                margin-bottom: 8px;
+            }
+
+            .total-counter .number {
+                font-size: 2.5em;
+            }
+
+            .container {
+                padding: 10px;
+            }
+
+            body {
+                padding: 15px 10px;
+            }
+
+            .set-card {
+                padding: 15px;
+                border-radius: 15px;
+            }
+
+            .set-name {
+                font-size: 1.1em;
+                margin-bottom: 10px;
+            }
+
+            .set-count {
+                font-size: 2.8em;
+                padding: 15px;
+                margin: 12px 0;
+            }
+
+            .set-image-container {
+                height: 120px;
+                margin-bottom: 12px;
+            }
+
+            .set-actions {
+                gap: 6px;
+            }
+
+            .btn-increment,
+            .btn-decrement {
+                padding: 10px;
+                font-size: 1em;
+            }
+
+            .set-actions-secondary {
+                margin-top: 10px;
+            }
+
+            .btn-delete {
+                padding: 8px 10px;
+                font-size: 0.8em;
+                flex: 1;
+            }
+
+            .btn {
+                padding: 10px 16px;
+                font-size: 0.85em;
+            }
+
+            input[type="text"] {
+                padding: 12px 14px;
+                font-size: 16px;
+                border-radius: 10px;
+            }
+
+            .suggestion-item {
+                padding: 10px 12px;
+            }
+
+            .suggestion-item img {
+                width: 35px;
+                height: 35px;
             }
         }
     </style>
@@ -530,13 +752,17 @@
 
         <div class="controls">
             <div class="input-group">
-                <input 
-                    type="text" 
-                    id="setName" 
-                    placeholder="Enter set name (e.g., Scarlet & Violet, Base Set)"
-                    autocomplete="off"
-                >
-                <button class="btn btn-primary" onclick="addSet()">+ Add Set</button>
+                <div style="flex: 1; position: relative;">
+                    <input 
+                        type="text" 
+                        id="setName" 
+                        placeholder="Search sets (e.g., Scarlet, Base Set)"
+                        autocomplete="off"
+                        oninput="searchSets()"
+                    >
+                    <div id="suggestionsDropdown" class="suggestions-dropdown"></div>
+                </div>
+                <button class="btn btn-primary" onclick="addSet()" style="flex: 0 0 auto;">+ Add</button>
             </div>
             <button class="btn btn-secondary" onclick="resetAll()">Reset All</button>
         </div>
@@ -550,11 +776,88 @@
 
     <script>
         const STORAGE_KEY = 'pokemonSets';
+        const TCG_API = 'https://api.pokemontcg.io/v2/sets';
+        let allSets = [];
+        let debounceTimer;
+
+        // Fetch all Pokemon sets from TCG API
+        async function fetchPokemons() {
+            try {
+                const response = await fetch(TCG_API);
+                const data = await response.json();
+                allSets = data.data || [];
+            } catch (error) {
+                console.log('TCG API unavailable, using local mode');
+                allSets = [];
+            }
+        }
+
+        // Search for sets as user types
+        function searchSets() {
+            clearTimeout(debounceTimer);
+            const query = document.getElementById('setName').value.toLowerCase();
+            const dropdown = document.getElementById('suggestionsDropdown');
+
+            if (!query) {
+                dropdown.classList.remove('active');
+                return;
+            }
+
+            // Filter sets
+            const filtered = allSets.filter(set => 
+                set.name.toLowerCase().includes(query) || 
+                set.printedTotal?.toString().includes(query)
+            ).slice(0, 8); // Show top 8 results
+
+            if (filtered.length === 0) {
+                dropdown.classList.remove('active');
+                return;
+            }
+
+            // Render suggestions
+            dropdown.innerHTML = filtered.map(set => `
+                <div class="suggestion-item" onclick="selectSet('${set.name.replace(/'/g, "\\'")}', '${set.images.logo}')">
+                    <img src="${set.images.logo}" alt="${set.name}" onerror="this.style.display='none'">
+                    <div class="suggestion-text">
+                        <div>${set.name}</div>
+                        <div class="suggestion-code">${set.id}</div>
+                    </div>
+                </div>
+            `).join('');
+
+            dropdown.classList.add('active');
+        }
+
+        // Select a set from suggestions
+        function selectSet(name, logoUrl) {
+            document.getElementById('setName').value = name;
+            document.getElementById('suggestionsDropdown').classList.remove('active');
+            
+            // Store the logo URL for this set
+            const sets = loadSets();
+            if (!sets[name]) {
+                sets[name] = { count: 0, image: logoUrl };
+                saveSets(sets);
+                render();
+            }
+        }
 
         // Load sets from localStorage
         function loadSets() {
             const saved = localStorage.getItem(STORAGE_KEY);
-            return saved ? JSON.parse(saved) : {};
+            if (!saved) return {};
+            
+            const parsed = JSON.parse(saved);
+            // Handle both old format (number) and new format (object)
+            const converted = {};
+            Object.entries(parsed).forEach(([name, value]) => {
+                if (typeof value === 'number') {
+                    converted[name] = { count: value, image: null };
+                } else {
+                    converted[name] = value;
+                }
+            });
+            return converted;
         }
 
         // Save sets to localStorage
@@ -568,7 +871,7 @@
             const container = document.getElementById('setsContainer');
             
             // Update total
-            const total = Object.values(sets).reduce((sum, count) => sum + count, 0);
+            const total = Object.values(sets).reduce((sum, item) => sum + (item.count || 0), 0);
             document.getElementById('totalCount').textContent = total;
 
             // Clear container
@@ -576,23 +879,32 @@
 
             // Check if empty
             if (Object.keys(sets).length === 0) {
-                container.innerHTML = '<div class="empty-state" style="grid-column: 1/-1;"><p>🎁 No sets yet! Add your first set to get started.</p></div>';
+                container.innerHTML = '<div class="empty-state" style="grid-column: 1/-1;"><p>🎁 No sets yet! Search and add your first set to get started.</p></div>';
                 return;
             }
 
             // Render each set
-            Object.entries(sets).forEach(([setName, count]) => {
+            Object.entries(sets).forEach(([setName, setData]) => {
+                const count = setData.count || 0;
+                const image = setData.image;
+                
                 const card = document.createElement('div');
                 card.className = 'set-card';
+                
+                const imageHTML = image ? 
+                    `<img src="${image}" alt="${setName}" class="set-image" onerror="this.parentElement.innerHTML='<div class=\\'set-image-placeholder\\'>🎴</div>'">` :
+                    `<div class="set-image-placeholder">🎴</div>`;
+                
                 card.innerHTML = `
+                    <div class="set-image-container">${imageHTML}</div>
                     <div class="set-name">${setName}</div>
                     <div class="set-count">${count}</div>
                     <div class="set-actions">
-                        <button class="btn-increment" onclick="incrementSet('${setName}')">➕</button>
-                        <button class="btn-decrement" onclick="decrementSet('${setName}')">➖</button>
+                        <button class="btn-increment" onclick="incrementSet('${setName.replace(/'/g, "\\'")}')">➕</button>
+                        <button class="btn-decrement" onclick="decrementSet('${setName.replace(/'/g, "\\'")}')">➖</button>
                     </div>
                     <div class="set-actions-secondary">
-                        <button class="btn-delete" onclick="deleteSet('${setName}')">Remove Set</button>
+                        <button class="btn-delete" onclick="deleteSet('${setName.replace(/'/g, "\\'")}')">Remove Set</button>
                     </div>
                 `;
                 container.appendChild(card);
@@ -605,7 +917,7 @@
             const name = input.value.trim();
 
             if (!name) {
-                alert('Please enter a set name');
+                alert('Please enter or select a set name');
                 return;
             }
 
@@ -615,9 +927,14 @@
                 return;
             }
 
-            sets[name] = 0;
+            // Find matching set from API for image
+            const matchedSet = allSets.find(s => s.name.toLowerCase() === name.toLowerCase());
+            const image = matchedSet?.images.logo || null;
+
+            sets[name] = { count: 0, image: image };
             saveSets(sets);
             input.value = '';
+            document.getElementById('suggestionsDropdown').classList.remove('active');
             render();
         }
 
@@ -625,7 +942,7 @@
         function incrementSet(setName) {
             const sets = loadSets();
             if (sets[setName] !== undefined) {
-                sets[setName]++;
+                sets[setName].count = (sets[setName].count || 0) + 1;
                 saveSets(sets);
                 render();
             }
@@ -634,8 +951,8 @@
         // Decrement pack count for a set
         function decrementSet(setName) {
             const sets = loadSets();
-            if (sets[setName] !== undefined && sets[setName] > 0) {
-                sets[setName]--;
+            if (sets[setName] !== undefined && (sets[setName].count || 0) > 0) {
+                sets[setName].count--;
                 saveSets(sets);
                 render();
             }
@@ -654,22 +971,29 @@
         // Reset all sets to 0
         function resetAll() {
             if (confirm('Reset all pack counts to 0?')) {
-                Object.keys(loadSets()).forEach(setName => {
-                    const sets = loadSets();
-                    sets[setName] = 0;
-                    saveSets(sets);
+                const sets = loadSets();
+                Object.keys(sets).forEach(setName => {
+                    sets[setName].count = 0;
                 });
+                saveSets(sets);
                 render();
             }
         }
+
+        // Close dropdown when clicking outside
+        document.addEventListener('click', (e) => {
+            if (e.target.id !== 'setName') {
+                document.getElementById('suggestionsDropdown').classList.remove('active');
+            }
+        });
 
         // Allow Enter key to add set
         document.getElementById('setName').addEventListener('keypress', (e) => {
             if (e.key === 'Enter') addSet();
         });
 
-        // Initial render
-        render();
+        // Initialize
+        fetchPokemons().then(() => render());
     </script>
 </body>
 </html>
