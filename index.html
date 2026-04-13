@@ -785,7 +785,13 @@
             try {
                 const response = await fetch(TCG_API);
                 const data = await response.json();
-                allSets = data.data || [];
+                // Filter only valid sets with images
+                allSets = (data.data || []).filter(set => 
+                    set.images && 
+                    set.images.logo && 
+                    set.name && 
+                    set.printedTotal !== undefined
+                );
             } catch (error) {
                 console.log('TCG API unavailable, using local mode');
                 allSets = [];
@@ -795,19 +801,22 @@
         // Search for sets as user types
         function searchSets() {
             clearTimeout(debounceTimer);
-            const query = document.getElementById('setName').value.toLowerCase();
+            const query = document.getElementById('setName').value.toLowerCase().trim();
             const dropdown = document.getElementById('suggestionsDropdown');
 
-            if (!query) {
+            if (!query || query.length < 2) {
                 dropdown.classList.remove('active');
                 return;
             }
 
-            // Filter sets
-            const filtered = allSets.filter(set => 
-                set.name.toLowerCase().includes(query) || 
-                set.printedTotal?.toString().includes(query)
-            ).slice(0, 8); // Show top 8 results
+            // Filter sets - only match if set name starts with the query (more strict)
+            const filtered = allSets.filter(set => {
+                const name = set.name.toLowerCase();
+                const series = (set.series || '').toLowerCase();
+                
+                return (name.startsWith(query) || series.startsWith(query)) &&
+                       set.images.logo;
+            }).slice(0, 8); // Show top 8 results
 
             if (filtered.length === 0) {
                 dropdown.classList.remove('active');
@@ -816,11 +825,11 @@
 
             // Render suggestions
             dropdown.innerHTML = filtered.map(set => `
-                <div class="suggestion-item" onclick="selectSet('${set.name.replace(/'/g, "\\'")}', '${set.images.logo}')">
-                    <img src="${set.images.logo}" alt="${set.name}" onerror="this.style.display='none'">
+                <div class="suggestion-item" onclick="selectSet('${set.name.replace(/'/g, "\\'")}', '${set.images.logo.replace(/'/g, "\\'")}')">
+                    <img src="${set.images.logo}" alt="${set.name}" onerror="this.style.display='none'" style="display: block;">
                     <div class="suggestion-text">
                         <div>${set.name}</div>
-                        <div class="suggestion-code">${set.id}</div>
+                        <div class="suggestion-code">${set.id} • ${set.total} cards</div>
                     </div>
                 </div>
             `).join('');
@@ -929,7 +938,7 @@
 
             // Find matching set from API for image
             const matchedSet = allSets.find(s => s.name.toLowerCase() === name.toLowerCase());
-            const image = matchedSet?.images.logo || null;
+            const image = matchedSet?.images?.logo || null;
 
             sets[name] = { count: 0, image: image };
             saveSets(sets);
