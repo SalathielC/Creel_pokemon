@@ -60,49 +60,6 @@
             text-align: center;
             margin-bottom: 50px;
             animation: slideDown 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);
-            position: relative;
-        }
-
-        .header-icons {
-            display: flex;
-            justify-content: center;
-            gap: 40px;
-            align-items: center;
-            margin-bottom: 30px;
-            animation: fadeIn 1s ease-out;
-        }
-
-        .pokeball-icon {
-            width: 60px;
-            height: 60px;
-            animation: spin 4s linear infinite;
-            opacity: 0.9;
-        }
-
-        .pikachu-icon {
-            width: 70px;
-            height: 70px;
-            filter: drop-shadow(0 4px 15px rgba(255, 215, 0, 0.4));
-            animation: bounce 2s ease-in-out infinite;
-            opacity: 0.95;
-        }
-
-        @keyframes spin {
-            0% {
-                transform: rotate(0deg);
-            }
-            100% {
-                transform: rotate(360deg);
-            }
-        }
-
-        @keyframes bounce {
-            0%, 100% {
-                transform: translateY(0);
-            }
-            50% {
-                transform: translateY(-10px);
-            }
         }
 
         header h1 {
@@ -814,21 +771,6 @@
 <body>
     <div class="container">
         <header>
-            <div class="header-icons">
-                <svg class="pokeball-icon" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
-                    <!-- Top half (red) -->
-                    <path d="M 50 10 A 40 40 0 0 1 50 30 L 50 50 Z" fill="#FF1919" stroke="#FFF" stroke-width="2"/>
-                    <!-- Bottom half (white) -->
-                    <path d="M 50 50 L 50 70 A 40 40 0 0 1 50 90 A 40 40 0 0 1 50 70 Z" fill="#FFF" stroke="#FFF" stroke-width="2"/>
-                    <!-- Center circle (black) -->
-                    <circle cx="50" cy="50" r="12" fill="#000" stroke="#FFF" stroke-width="2"/>
-                    <!-- Left semicircle outline -->
-                    <path d="M 10 50 A 40 40 0 0 1 90 50" fill="none" stroke="#FFF" stroke-width="2"/>
-                </svg>
-
-                <img class="pikachu-icon" src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/25.png" alt="Pikachu 30th Anniversary" onerror="this.style.display='none'">
-            </div>
-            
             <h1>🔴 Pokémon Pack Counter 🔴</h1>
             <p style="color: #ffd700; font-size: 1.1em;">Track your pack openings</p>
         </header>
