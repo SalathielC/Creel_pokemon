@@ -805,8 +805,18 @@
             }
         }
 
-        .set-card.updating {
-            animation: cardPulse 0.4s ease-out !important;
+        @keyframes fadeUp {
+            0% {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            50% {
+                opacity: 1;
+            }
+            100% {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
         }
 
         @media (max-width: 768px) {
@@ -1006,6 +1016,7 @@
         <div class="total-counter">
             <h2>Total Packs Opened</h2>
             <div class="number" id="totalCount">0</div>
+            <div id="topSet" style="font-size: 1.1em; color: #ffd700; margin-top: 12px; font-weight: 600;"></div>
         </div>
 
         <div class="controls">
@@ -1044,8 +1055,8 @@
             </div>
 
             <div class="modal-tabs">
-                <button class="modal-tab-btn active" onclick="switchTab('leaderboard')">Leaderboard</button>
-                <button class="modal-tab-btn" onclick="switchTab('share')">Share Stats</button>
+                <button class="modal-tab-btn active" onclick="switchTab(event, 'leaderboard')">Leaderboard</button>
+                <button class="modal-tab-btn" onclick="switchTab(event, 'share')">Share Stats</button>
             </div>
 
             <!-- Leaderboard Tab -->
@@ -1062,12 +1073,14 @@
                 <p style="color: rgba(255, 215, 0, 0.8); margin-bottom: 15px; text-align: center;">Share your stats with friends!</p>
                 <div class="share-stats-form">
                     <input type="text" id="shareLink" readonly placeholder="Your share link will appear here">
-                    <button class="copy-btn" onclick="copyShareLink()">Copy</button>
+                    <button class="copy-btn" onclick="copyShareLink(event)">Copy</button>
                 </div>
                 <p style="color: rgba(255, 215, 0, 0.6); font-size: 0.9em; text-align: center;">Share this link with friends to let them add you to their leaderboard.</p>
             </div>
         </div>
     </div>
+
+    <script>
         const STORAGE_KEY = 'pokemonSets';
         const TCG_API = 'https://api.pokemontcg.io/v2/sets';
         let allSets = [];
@@ -1101,42 +1114,45 @@
         // Search for sets as user types
         function searchSets() {
             clearTimeout(debounceTimer);
-            const query = document.getElementById('setName').value.toLowerCase().trim();
-            const dropdown = document.getElementById('suggestionsDropdown');
+            
+            debounceTimer = setTimeout(() => {
+                const query = document.getElementById('setName').value.toLowerCase().trim();
+                const dropdown = document.getElementById('suggestionsDropdown');
 
-            if (!query || query.length < 2) {
-                dropdown.classList.remove('active');
-                return;
-            }
+                if (!query || query.length < 2) {
+                    dropdown.classList.remove('active');
+                    return;
+                }
 
-            // Filter sets - only match if set name starts with the query (more strict)
-            const filtered = allSets.filter(set => {
-                const name = set.name.toLowerCase();
-                const series = (set.series || '').toLowerCase();
-                
-                return (name.startsWith(query) || series.startsWith(query)) &&
-                       set.images && 
-                       set.images.logo &&
-                       isValidImageUrl(set.images.logo);
-            }).slice(0, 8); // Show top 8 results
+                // Filter sets - only match if set name starts with the query (more strict)
+                const filtered = allSets.filter(set => {
+                    const name = set.name.toLowerCase();
+                    const series = (set.series || '').toLowerCase();
+                    
+                    return (name.startsWith(query) || series.startsWith(query)) &&
+                           set.images && 
+                           set.images.logo &&
+                           isValidImageUrl(set.images.logo);
+                }).slice(0, 8); // Show top 8 results
 
-            if (filtered.length === 0) {
-                dropdown.classList.remove('active');
-                return;
-            }
+                if (filtered.length === 0) {
+                    dropdown.classList.remove('active');
+                    return;
+                }
 
-            // Render suggestions
-            dropdown.innerHTML = filtered.map(set => `
-                <div class="suggestion-item" onclick="selectSet('${set.name.replace(/'/g, "\\'")}', '${set.images.logo.replace(/'/g, "\\'")}')">
-                    <img src="${set.images.logo}" alt="${set.name}" onerror="this.style.display='none'" style="display: block;">
-                    <div class="suggestion-text">
-                        <div>${set.name}</div>
-                        <div class="suggestion-code">${set.id} • ${set.total} cards</div>
+                // Render suggestions
+                dropdown.innerHTML = filtered.map(set => `
+                    <div class="suggestion-item" data-name="${set.name}" data-logo="${set.images.logo}">
+                        <img src="${set.images.logo}" alt="${set.name}" onerror="this.style.display='none'" style="display: block;">
+                        <div class="suggestion-text">
+                            <div>${set.name}</div>
+                            <div class="suggestion-code">${set.id} • ${set.total} cards</div>
+                        </div>
                     </div>
-                </div>
-            `).join('');
+                `).join('');
 
-            dropdown.classList.add('active');
+                dropdown.classList.add('active');
+            }, 200); // 200ms debounce delay
         }
 
         // Select a set from suggestions
@@ -1152,6 +1168,16 @@
                 render();
             }
         }
+
+        // Handle suggestion item clicks with event delegation
+        document.addEventListener('click', (e) => {
+            const item = e.target.closest('.suggestion-item');
+            if (item && document.getElementById('suggestionsDropdown').contains(item)) {
+                const name = item.dataset.name;
+                const logo = item.dataset.logo;
+                selectSet(name, logo);
+            }
+        });
 
         // Load sets from localStorage
         function loadSets() {
@@ -1184,6 +1210,15 @@
             // Update total
             const total = Object.values(sets).reduce((sum, item) => sum + (item.count || 0), 0);
             document.getElementById('totalCount').textContent = total;
+            
+            // Update top set (favorite)
+            const stats = getStats();
+            const topSetElement = document.getElementById('topSet');
+            if (stats.mostOpenedSet !== 'None' && total > 0) {
+                topSetElement.textContent = `🏆 Favorite: ${stats.mostOpenedSet}`;
+            } else {
+                topSetElement.textContent = '';
+            }
 
             // Clear container
             container.innerHTML = '';
@@ -1267,6 +1302,15 @@
                     const total = Object.values(sets).reduce((sum, item) => sum + (item.count || 0), 0);
                     document.getElementById('totalCount').textContent = total;
                     
+                    // Update top set (favorite)
+                    const stats = getStats();
+                    const topSetElement = document.getElementById('topSet');
+                    if (stats.mostOpenedSet !== 'None' && total > 0) {
+                        topSetElement.textContent = `🏆 Favorite: ${stats.mostOpenedSet}`;
+                    } else {
+                        topSetElement.textContent = '';
+                    }
+                    
                     // Update the count display
                     const countElement = card.querySelector('.set-count');
                     countElement.textContent = sets[setName].count;
@@ -1280,6 +1324,23 @@
                     card.classList.remove('pulse');
                     void card.offsetWidth;
                     card.classList.add('pulse');
+                    
+                    // Add floating "+1" animation
+                    const plusOne = document.createElement('div');
+                    plusOne.textContent = '+1';
+                    plusOne.style.position = 'absolute';
+                    plusOne.style.color = '#ffd700';
+                    plusOne.style.fontWeight = '900';
+                    plusOne.style.zIndex = '10';
+                    plusOne.style.pointerEvents = 'none';
+                    plusOne.style.fontSize = '1.5em';
+                    plusOne.style.top = '20px';
+                    plusOne.style.right = '20px';
+                    plusOne.style.animation = 'fadeUp 0.6s ease-out';
+                    plusOne.style.textShadow = '0 2px 10px rgba(0, 0, 0, 0.5)';
+                    
+                    card.appendChild(plusOne);
+                    setTimeout(() => plusOne.remove(), 600);
                 } else {
                     // Card not found, do full render
                     render();
@@ -1300,6 +1361,15 @@
                     // Update total count
                     const total = Object.values(sets).reduce((sum, item) => sum + (item.count || 0), 0);
                     document.getElementById('totalCount').textContent = total;
+                    
+                    // Update top set (favorite)
+                    const stats = getStats();
+                    const topSetElement = document.getElementById('topSet');
+                    if (stats.mostOpenedSet !== 'None' && total > 0) {
+                        topSetElement.textContent = `🏆 Favorite: ${stats.mostOpenedSet}`;
+                    } else {
+                        topSetElement.textContent = '';
+                    }
                     
                     // Update the count display
                     const countElement = card.querySelector('.set-count');
@@ -1497,7 +1567,7 @@
         }
 
         // Copy share link
-        function copyShareLink() {
+        function copyShareLink(event) {
             const shareLink = generateShareLink();
             document.getElementById('shareLink').value = shareLink;
             
@@ -1526,7 +1596,7 @@
         }
 
         // Switch tabs in modal
-        function switchTab(tabName) {
+        function switchTab(event, tabName) {
             // Hide all tabs
             document.querySelectorAll('.modal-tab').forEach(tab => {
                 tab.classList.remove('active');
