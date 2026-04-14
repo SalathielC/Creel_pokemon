@@ -1874,12 +1874,7 @@
         // Initialize
         checkFriendShare();
         fetchPokemons().then(() => render());
-    </script>
 
-    <!-- Theme Modal -->
-    <div id="themeDropdown" class="theme-dropdown"></div>
-
-    <script>
         // ============ THEME SYSTEM ============
         const THEMES = [
             {
@@ -1961,6 +1956,8 @@
 
         function renderThemeSelector() {
             const dropdown = document.getElementById('themeDropdown');
+            if (!dropdown) return;
+            
             const sets = loadSets();
             const totalPacks = Object.values(sets).reduce((sum, item) => sum + (item.count || 0), 0);
             const currentTheme = getThemeStorage();
@@ -1988,18 +1985,24 @@
 
         function openThemeSelector() {
             renderThemeSelector();
-            document.getElementById('themeDropdown').classList.toggle('active');
+            const dropdown = document.getElementById('themeDropdown');
+            if (dropdown) {
+                dropdown.classList.toggle('active');
+            }
         }
 
         function closeThemeSelector() {
-            document.getElementById('themeDropdown').classList.remove('active');
+            const dropdown = document.getElementById('themeDropdown');
+            if (dropdown) {
+                dropdown.classList.remove('active');
+            }
         }
 
         function selectTheme(themeId) {
             const theme = THEMES.find(t => t.id === themeId);
             if (theme && isThemeUnlocked(theme.unlockAt, theme.free)) {
                 applyTheme(themeId);
-                renderThemeSelector(); // Update UI to show active state
+                renderThemeSelector();
             }
         }
 
@@ -2013,17 +2016,17 @@
             }
         });
 
-        // Initialize on page load
-        window.addEventListener('DOMContentLoaded', function() {
-            applyTheme(getThemeStorage());
-            renderThemeSelector();
-        });
+        // Apply theme on page load
+        applyTheme(getThemeStorage());
         
-        // Fallback for if DOMContentLoaded already fired
-        if (document.readyState === 'interactive' || document.readyState === 'complete') {
-            applyTheme(getThemeStorage());
+        // Initialize theme dropdown after a short delay to ensure DOM is ready
+        setTimeout(() => {
             renderThemeSelector();
-        }
+        }, 100);
     </script>
+
+    <!-- Theme Dropdown -->
+    <div id="themeDropdown" class="theme-dropdown"></div>
+
 </body>
 </html>
