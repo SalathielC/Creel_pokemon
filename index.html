@@ -288,7 +288,7 @@
             align-items: center;
             justify-content: center;
             background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
-            opacity: 0.15;
+            opacity: 0.25;
             font-size: 3em;
         }
 
@@ -399,7 +399,6 @@
             flex: 1;
             padding: 16px 20px;
             border: 2px solid var(--primary-color);
-            opacity: 0.3;
             border-radius: 12px;
             background: var(--bg-secondary);
             color: var(--text-primary);
@@ -418,7 +417,6 @@
             outline: none;
             border-color: var(--primary-color);
             background: var(--bg-secondary);
-            opacity: 1;
             box-shadow: 
                 0 0 20px var(--card-glow),
                 inset 0 1px 0 rgba(255, 255, 255, 0.1);
@@ -431,7 +429,6 @@
             right: 0;
             background: var(--bg-secondary);
             border: 2px solid var(--primary-color);
-            opacity: 0.3;
             border-top: none;
             border-radius: 0 0 12px 12px;
             max-height: 300px;
@@ -452,7 +449,6 @@
             cursor: pointer;
             transition: all 0.2s ease;
             border-bottom: 1px solid var(--primary-color);
-            opacity: 0.2;
             display: flex;
             align-items: center;
             gap: 12px;
@@ -464,7 +460,6 @@
 
         .suggestion-item:hover {
             background: var(--primary-color);
-            opacity: 0.3;
             padding-left: 20px;
         }
 
@@ -553,9 +548,8 @@
         }
 
         .leaderboard-item {
-            background: var(--primary-color);
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
             border: 2px solid var(--primary-color);
-            opacity: 0.15;
             border-radius: 12px;
             padding: 15px;
             display: flex;
