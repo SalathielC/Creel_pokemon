@@ -1038,17 +1038,43 @@
             --accent-glow: rgba(255, 25, 25, 0.25);
         }
 
-        /* Retro 8-bit Theme */
-        body.theme-retro-8bit {
-            --primary-color: #ff00ff;
-            --secondary-color: #00ffff;
-            --danger-color: #ffff00;
-            --bg-primary: linear-gradient(135deg, #2d1b69 0%, #3d2e7a 50%, #1a0f33 100%);
-            --bg-secondary: rgba(255, 0, 255, 0.08);
+        /* Midnight Dragon Theme */
+        body.theme-midnight-dragon {
+            --primary-color: #8b00ff;
+            --secondary-color: #1a1a4d;
+            --danger-color: #ff00ff;
+            --bg-primary: linear-gradient(135deg, #0d0015 0%, #1a001a 50%, #0a000a 100%);
+            --bg-secondary: rgba(139, 0, 255, 0.08);
             --text-primary: #ffffff;
-            --text-secondary: #00ffff;
-            --card-glow: rgba(255, 0, 255, 0.3);
-            --accent-glow: rgba(0, 255, 255, 0.2);
+            --text-secondary: #c9a0ff;
+            --card-glow: rgba(139, 0, 255, 0.35);
+            --accent-glow: rgba(255, 0, 255, 0.25);
+        }
+
+        /* Fire Blaze Theme */
+        body.theme-fire-blaze {
+            --primary-color: #ffaa00;
+            --secondary-color: #ff1744;
+            --danger-color: #ff1744;
+            --bg-primary: linear-gradient(135deg, #3d0000 0%, #4d1f00 50%, #2d0000 100%);
+            --bg-secondary: rgba(255, 170, 0, 0.08);
+            --text-primary: #ffffff;
+            --text-secondary: #ffcc99;
+            --card-glow: rgba(255, 170, 0, 0.35);
+            --accent-glow: rgba(255, 23, 68, 0.25);
+        }
+
+        /* Ocean Wave Theme */
+        body.theme-ocean-wave {
+            --primary-color: #00bfff;
+            --secondary-color: #0066cc;
+            --danger-color: #0066cc;
+            --bg-primary: linear-gradient(135deg, #001a33 0%, #003366 50%, #000f1f 100%);
+            --bg-secondary: rgba(0, 191, 255, 0.08);
+            --text-primary: #ffffff;
+            --text-secondary: #66d9ff;
+            --card-glow: rgba(0, 191, 255, 0.35);
+            --accent-glow: rgba(0, 102, 204, 0.25);
         }
 
         /* Neon Cyber Theme */
@@ -1064,30 +1090,43 @@
             --accent-glow: rgba(255, 0, 255, 0.2);
         }
 
-        /* Gold/Silver Theme (Gen II) */
-        body.theme-gold-silver {
-            --primary-color: #ffd700;
-            --secondary-color: #c0c0c0;
-            --danger-color: #ff6b00;
-            --bg-primary: linear-gradient(135deg, #2a2416 0%, #3d3528 50%, #1f1915 100%);
-            --bg-secondary: rgba(255, 215, 0, 0.08);
-            --text-primary: #fdf5e6;
-            --text-secondary: #c0c0c0;
-            --card-glow: rgba(255, 215, 0, 0.4);
-            --accent-glow: rgba(192, 192, 192, 0.25);
+        /* Crystal Magic Theme */
+        body.theme-crystal-magic {
+            --primary-color: #00ffff;
+            --secondary-color: #ff00ff;
+            --danger-color: #ff00ff;
+            --bg-primary: linear-gradient(135deg, #1a0033 0%, #2d0052 50%, #0f001a 100%);
+            --bg-secondary: rgba(0, 255, 255, 0.08);
+            --text-primary: #ffffff;
+            --text-secondary: #99ffff;
+            --card-glow: rgba(0, 255, 255, 0.35);
+            --accent-glow: rgba(255, 0, 255, 0.25);
         }
 
-        /* Pastel Nature Theme */
-        body.theme-pastel-nature {
-            --primary-color: #85e7c9;
-            --secondary-color: #ffa6c1;
-            --danger-color: #ff9d88;
-            --bg-primary: linear-gradient(135deg, #f3e5f5 0%, #e8f5e9 50%, #fff3e0 100%);
-            --bg-secondary: rgba(133, 231, 201, 0.1);
-            --text-primary: #37474f;
-            --text-secondary: #546e7a;
-            --card-glow: rgba(133, 231, 201, 0.3);
-            --accent-glow: rgba(255, 166, 193, 0.2);
+        /* Sunset Glow Theme */
+        body.theme-sunset-glow {
+            --primary-color: #ff00aa;
+            --secondary-color: #ff6b00;
+            --danger-color: #ff6b00;
+            --bg-primary: linear-gradient(135deg, #3d0014 0%, #4d1f00 50%, #2d000f 100%);
+            --bg-secondary: rgba(255, 0, 170, 0.08);
+            --text-primary: #ffffff;
+            --text-secondary: #ffaa99;
+            --card-glow: rgba(255, 0, 170, 0.35);
+            --accent-glow: rgba(255, 107, 0, 0.25);
+        }
+
+        /* Forest Spirits Theme */
+        body.theme-forest-spirits {
+            --primary-color: #ffff00;
+            --secondary-color: #00aa44;
+            --danger-color: #ffff00;
+            --bg-primary: linear-gradient(135deg, #1a3d2e 0%, #2d5c3d 50%, #0f2414 100%);
+            --bg-secondary: rgba(255, 255, 0, 0.08);
+            --text-primary: #ffffff;
+            --text-secondary: #99ff99;
+            --card-glow: rgba(255, 255, 0, 0.35);
+            --accent-glow: rgba(0, 170, 68, 0.25);
         }
 
         /* Classic Light Theme */
@@ -1124,6 +1163,18 @@
         .theme-btn:hover {
             transform: translateY(-2px);
             box-shadow: 0 6px 20px var(--card-glow);
+        }
+
+        /* Theme Button + Dropdown Wrapper */
+        .theme-btn-wrapper {
+            position: fixed;
+            top: 30px;
+            right: 30px;
+            z-index: 900;
+        }
+
+        .theme-btn-wrapper:hover .theme-dropdown {
+            display: flex;
         }
 
         /* Theme Dropdown */
@@ -1886,12 +1937,28 @@
                 colors: ['#ffd700', '#ff6b35']
             },
             {
-                id: 'theme-retro-8bit',
-                name: '👾 Retro 8-bit',
-                class: 'theme-retro-8bit',
+                id: 'theme-midnight-dragon',
+                name: '🐉 Midnight Dragon',
+                class: 'theme-midnight-dragon',
+                unlockAt: 25,
+                free: false,
+                colors: ['#1a1a4d', '#8b00ff']
+            },
+            {
+                id: 'theme-fire-blaze',
+                name: '🔥 Fire Blaze',
+                class: 'theme-fire-blaze',
                 unlockAt: 50,
                 free: false,
-                colors: ['#ff00ff', '#00ffff']
+                colors: ['#ff1744', '#ffaa00']
+            },
+            {
+                id: 'theme-ocean-wave',
+                name: '🌊 Ocean Wave',
+                class: 'theme-ocean-wave',
+                unlockAt: 75,
+                free: false,
+                colors: ['#00bfff', '#0066cc']
             },
             {
                 id: 'theme-neon-cyber',
@@ -1902,20 +1969,28 @@
                 colors: ['#00ff00', '#ff00ff']
             },
             {
-                id: 'theme-gold-silver',
-                name: '✨ Gold & Silver',
-                class: 'theme-gold-silver',
+                id: 'theme-crystal-magic',
+                name: '✨ Crystal Magic',
+                class: 'theme-crystal-magic',
                 unlockAt: 100,
                 free: false,
-                colors: ['#ffd700', '#c0c0c0']
+                colors: ['#ff00ff', '#00ffff']
             },
             {
-                id: 'theme-pastel-nature',
-                name: '🌸 Pastel Nature',
-                class: 'theme-pastel-nature',
+                id: 'theme-sunset-glow',
+                name: '🌅 Sunset Glow',
+                class: 'theme-sunset-glow',
+                unlockAt: 125,
+                free: false,
+                colors: ['#ff6b00', '#ff00aa']
+            },
+            {
+                id: 'theme-forest-spirits',
+                name: '🌲 Forest Spirits',
+                class: 'theme-forest-spirits',
                 unlockAt: 150,
                 free: false,
-                colors: ['#85e7c9', '#ffa6c1']
+                colors: ['#00aa44', '#ffff00']
             },
             {
                 id: 'theme-light',
@@ -2003,7 +2078,43 @@
             if (theme && isThemeUnlocked(theme.unlockAt, theme.free)) {
                 applyTheme(themeId);
                 renderThemeSelector();
+                closeThemeSelector();
             }
+        }
+
+        // Hover functionality for theme dropdown
+        const themeBtn = document.querySelector('.theme-btn');
+        const dropdownElement = document.getElementById('themeDropdown');
+        
+        if (themeBtn && dropdownElement) {
+            let hoverTimeout;
+            
+            // Show dropdown on button hover
+            themeBtn.addEventListener('mouseenter', function() {
+                clearTimeout(hoverTimeout);
+                renderThemeSelector();
+                dropdownElement.classList.add('active');
+            });
+            
+            // Keep dropdown visible when hovering over it
+            dropdownElement.addEventListener('mouseenter', function() {
+                clearTimeout(hoverTimeout);
+                dropdownElement.classList.add('active');
+            });
+            
+            // Hide dropdown when leaving button
+            themeBtn.addEventListener('mouseleave', function() {
+                hoverTimeout = setTimeout(() => {
+                    dropdownElement.classList.remove('active');
+                }, 200);
+            });
+            
+            // Hide dropdown when leaving dropdown
+            dropdownElement.addEventListener('mouseleave', function() {
+                hoverTimeout = setTimeout(() => {
+                    dropdownElement.classList.remove('active');
+                }, 200);
+            });
         }
 
         // Close dropdown when clicking outside
