@@ -1425,45 +1425,47 @@
     </div>
 
     <script>
-        // ===== SUPABASE INITIALIZATION =====
+        // ===== GLOBAL VARIABLES =====
+        let supabase = null;
+        let allSets = [];
+        let debounceTimer = null;
+        let currentPlayerId = null;
+        let currentPlayerName = null;
+        
+        // ===== CONSTANTS =====
         const SUPABASE_URL = "https://viejiddhyrvedgeijxec.supabase.co";
         const SUPABASE_KEY = "sb_publishable_aOhWOkPVQjylLcaCDDuanA_Rw2Knjhy";
-        let supabase = null;
-
-        // Wait for Supabase to load, then initialize
-        async function initSupabase() {
-            if (supabase) return; // Already initialized
-            
-            // Wait for Supabase library to load
-            let attempts = 0;
-            while (!window.supabase && attempts < 50) {
-                await new Promise(r => setTimeout(r, 100));
-                attempts++;
-            }
-            
-            if (!window.supabase) {
-                console.error('Supabase library failed to load');
-                return;
-            }
-            
-            try {
-                const { createClient } = window.supabase;
-                supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
-                console.log('✅ Supabase initialized successfully');
-            } catch (err) {
-                console.error('Failed to initialize Supabase:', err);
-            }
-        }
-
-        // ===== LOCAL STORAGE KEYS =====
         const STORAGE_KEY = 'pokemonSets';
         const TCG_API = 'https://api.pokemontcg.io/v2/sets';
         const PLAYER_ID_KEY = 'pokemonPlayerId';
         const PLAYER_NAME_KEY = 'pokemonPlayerName';
-        let allSets = [];
-        let debounceTimer;
-        let currentPlayerId = null;
-        let currentPlayerName = null;
+        const FRIENDS_KEY = 'pokemonFriends';
+        const USER_ID_KEY = 'pokemonUserId';
+
+        // ===== SUPABASE INITIALIZATION =====
+        async function initSupabase() {
+            if (supabase) return; // Already initialized
+            
+            try {
+                // Wait for Supabase library to load (up to 5 seconds)
+                let attempts = 0;
+                while (!window.supabase && attempts < 50) {
+                    await new Promise(r => setTimeout(r, 100));
+                    attempts++;
+                }
+                
+                if (!window.supabase) {
+                    console.error('❌ Supabase library failed to load. App will work locally only.');
+                    return;
+                }
+                
+                const { createClient } = window.supabase;
+                supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
+                console.log('✅ Supabase initialized successfully');
+            } catch (err) {
+                console.error('❌ Failed to initialize Supabase:', err);
+            }
+        }
 
         // Validate image URL
         function isValidImageUrl(url) {
@@ -1474,7 +1476,14 @@
         // Fetch all Pokemon sets from TCG API
         async function fetchPokemons() {
             try {
-                const response = await fetch(TCG_API);
+                const response = await fetch(TCG_API, {
+                    signal: AbortSignal.timeout(10000) // 10 second timeout
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`API error: ${response.status}`);
+                }
+                
                 const data = await response.json();
                 // Filter only valid sets with images
                 allSets = (data.data || []).filter(set => 
@@ -1484,8 +1493,9 @@
                     set.name && 
                     set.printedTotal !== undefined
                 );
+                console.log(`✅ Loaded ${allSets.length} Pokémon sets from TCG API`);
             } catch (error) {
-                console.log('TCG API unavailable, using local mode');
+                console.warn('⚠️ TCG API unavailable, using local mode:', error.message);
                 allSets = [];
             }
         }
@@ -1674,36 +1684,50 @@
                 sets[setName].count = (sets[setName].count || 0) + 1;
                 saveSets(sets);
                 
-                // Find the card element
-                const card = document.querySelector(`[data-set-name="${setName}"]`);
+                // Find the card element using CSS.escape for safety
+                const escapedName = CSS.escape(setName);
+                const card = document.querySelector(`[data-set-name="${escapedName}"]`);
                 if (card) {
                     // Update total count
                     const total = Object.values(sets).reduce((sum, item) => sum + (item.count || 0), 0);
-                    document.getElementById('totalCount').textContent = total;
+                    const totalElement = document.getElementById('totalCount');
+                    if (totalElement) totalElement.textContent = total;
                     
                     // Update top set (favorite)
                     const stats = getStats();
                     const topSetElement = document.getElementById('topSet');
-                    if (stats.mostOpenedSet !== 'None' && total > 0) {
-                        topSetElement.textContent = `🏆 Favorite: ${stats.mostOpenedSet}`;
-                    } else {
-                        topSetElement.textContent = '';
+                    if (topSetElement) {
+                        if (stats.mostOpenedSet !== 'None' && total > 0) {
+                            topSetElement.textContent = `🏆 Favorite: ${stats.mostOpenedSet}`;
+                        } else {
+                            topSetElement.textContent = '';
+                        }
                     }
                     
                     // Update the count display
                     const countElement = card.querySelector('.set-count');
-                    countElement.textContent = sets[setName].count;
+                    if (countElement) {
+                        countElement.textContent = sets[setName].count;
+                        
+                        // Trigger smooth animation
+                        countElement.classList.remove('counting');
+                        void countElement.offsetWidth; // Force reflow
+                        countElement.classList.add('counting');
+                    }
                     
-                    // Update theme selector to reflect new unlocks
-                    renderThemeSelector();
+                    // Update theme selector
+                    try {
+                        renderThemeSelector();
+                    } catch (e) {
+                        console.warn('Theme selector error:', e);
+                    }
                     
                     // Sync to Supabase
-                    syncPlayerToSupabase();
-                    
-                    // Trigger smooth animation (only count, no full card)
-                    countElement.classList.remove('counting');
-                    void countElement.offsetWidth; // Force reflow to restart animation
-                    countElement.classList.add('counting');
+                    try {
+                        syncPlayerToSupabase();
+                    } catch (e) {
+                        console.warn('Supabase sync error:', e);
+                    }
                     
                     // Card pulse
                     card.classList.remove('pulse');
@@ -1740,36 +1764,50 @@
                 sets[setName].count--;
                 saveSets(sets);
                 
-                // Find the card element
-                const card = document.querySelector(`[data-set-name="${setName}"]`);
+                // Find the card element using CSS.escape for safety
+                const escapedName = CSS.escape(setName);
+                const card = document.querySelector(`[data-set-name="${escapedName}"]`);
                 if (card) {
                     // Update total count
                     const total = Object.values(sets).reduce((sum, item) => sum + (item.count || 0), 0);
-                    document.getElementById('totalCount').textContent = total;
+                    const totalElement = document.getElementById('totalCount');
+                    if (totalElement) totalElement.textContent = total;
                     
                     // Update top set (favorite)
                     const stats = getStats();
                     const topSetElement = document.getElementById('topSet');
-                    if (stats.mostOpenedSet !== 'None' && total > 0) {
-                        topSetElement.textContent = `🏆 Favorite: ${stats.mostOpenedSet}`;
-                    } else {
-                        topSetElement.textContent = '';
+                    if (topSetElement) {
+                        if (stats.mostOpenedSet !== 'None' && total > 0) {
+                            topSetElement.textContent = `🏆 Favorite: ${stats.mostOpenedSet}`;
+                        } else {
+                            topSetElement.textContent = '';
+                        }
                     }
                     
                     // Update the count display
                     const countElement = card.querySelector('.set-count');
-                    countElement.textContent = sets[setName].count;
+                    if (countElement) {
+                        countElement.textContent = sets[setName].count;
+                        
+                        // Trigger animation
+                        countElement.classList.remove('counting');
+                        void countElement.offsetWidth;
+                        countElement.classList.add('counting');
+                    }
                     
-                    // Update theme selector to reflect new unlocks
-                    renderThemeSelector();
+                    // Update theme selector
+                    try {
+                        renderThemeSelector();
+                    } catch (e) {
+                        console.warn('Theme selector error:', e);
+                    }
                     
                     // Sync to Supabase
-                    syncPlayerToSupabase();
-                    
-                    // Trigger animation
-                    countElement.classList.remove('counting');
-                    void countElement.offsetWidth;
-                    countElement.classList.add('counting');
+                    try {
+                        syncPlayerToSupabase();
+                    } catch (e) {
+                        console.warn('Supabase sync error:', e);
+                    }
                     
                     // Card pulse
                     card.classList.remove('pulse');
@@ -1804,16 +1842,25 @@
         }
 
         // Close dropdown when clicking outside
-        document.addEventListener('click', (e) => {
-            if (e.target.id !== 'setName') {
-                document.getElementById('suggestionsDropdown').classList.remove('active');
-            }
-        });
+        function setupEventListeners() {
+            const setNameInput = document.getElementById('setName');
+            if (setNameInput) {
+                // Close suggestions when clicking outside
+                document.addEventListener('click', (e) => {
+                    if (e.target.id !== 'setName') {
+                        const dropdown = document.getElementById('suggestionsDropdown');
+                        if (dropdown) {
+                            dropdown.classList.remove('active');
+                        }
+                    }
+                });
 
-        // Allow Enter key to add set
-        document.getElementById('setName').addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') addSet();
-        });
+                // Allow Enter key to add set
+                setNameInput.addEventListener('keypress', (e) => {
+                    if (e.key === 'Enter') addSet();
+                });
+            }
+        }
 
         // ===== PLAYER IDENTITY SYSTEM =====
         function generatePlayerId() {
@@ -1851,35 +1898,35 @@
 
         async function syncPlayerToSupabase() {
             if (!supabase || !currentPlayerId || !currentPlayerName) {
-                console.warn('Supabase not ready or player info missing');
-                return;
+                return; // Silent fail - app works offline
             }
             
             const sets = loadSets();
             const totalPacks = Object.values(sets).reduce((sum, item) => sum + (item.count || 0), 0);
             
             try {
-                const { data, error } = await supabase.from('players').upsert({
-                    id: currentPlayerId,
-                    name: currentPlayerName,
-                    total: totalPacks,
-                    updated_at: new Date().toISOString()
-                }).select();
+                const { data, error } = await supabase
+                    .from('players')
+                    .upsert({
+                        id: currentPlayerId,
+                        name: currentPlayerName,
+                        total: totalPacks,
+                        updated_at: new Date().toISOString()
+                    })
+                    .select();
 
                 if (error) {
-                    console.error('Supabase sync error:', error);
+                    console.warn('⚠️ Supabase sync warning:', error.message);
                 } else {
                     console.log('✅ Synced to Supabase:', { id: currentPlayerId, name: currentPlayerName, total: totalPacks });
                 }
             } catch (err) {
-                console.error('Failed to sync to Supabase:', err);
+                console.warn('⚠️ Failed to sync to Supabase:', err.message);
+                // App continues working offline
             }
         }
 
         // ===== LEADERBOARD & SHARING FUNCTIONS =====
-        
-        const FRIENDS_KEY = 'pokemonFriends';
-        const USER_ID_KEY = 'pokemonUserId';
 
         // Generate unique user ID
         function getOrCreateUserId() {
@@ -1929,14 +1976,20 @@
 
         // Add friend to leaderboard (search player by name)
         async function addFriend() {
-            const input = document.getElementById('friendShareCode').value.trim();
+            const inputElement = document.getElementById('friendShareCode');
+            if (!inputElement) {
+                console.warn('Friend search input not found');
+                return;
+            }
+            
+            const input = inputElement.value.trim();
             if (!input) {
                 alert('Enter a player name to find them on the leaderboard!');
                 return;
             }
 
             if (!supabase) {
-                alert('Supabase not connected. Please refresh the page.');
+                alert('Leaderboard is offline. You can still play locally!');
                 return;
             }
 
@@ -1947,25 +2000,29 @@
                     .ilike('name', `%${input}%`)
                     .limit(5);
 
-                if (error) throw error;
+                if (error) {
+                    console.warn('Friend search error:', error);
+                    alert('Search failed. Try again.');
+                    return;
+                }
 
                 if (!foundPlayers || foundPlayers.length === 0) {
-                    alert('No players found with that name. Check the leaderboard!');
+                    alert('No players found. Check the leaderboard!');
                     return;
                 }
 
                 if (foundPlayers.length === 1) {
-                    alert('Found ' + foundPlayers[0].name + '! They are on the global leaderboard.');
+                    alert('Found ' + escapeHtml(foundPlayers[0].name) + '! They are on the leaderboard.');
                 } else {
-                    const names = foundPlayers.map(p => p.name).join(', ');
-                    alert('Found multiple players: ' + names);
+                    const names = foundPlayers.map(p => escapeHtml(p.name)).join(', ');
+                    alert('Found players: ' + names);
                 }
 
-                document.getElementById('friendShareCode').value = '';
-                renderLeaderboard();
+                inputElement.value = '';
+                await renderLeaderboard();
             } catch (err) {
-                console.error('Friend search error:', err);
-                alert('Error searching for player. Try again.');
+                console.warn('Friend search error:', err);
+                alert('Search failed: ' + err.message);
             }
         }
 
@@ -1982,9 +2039,13 @@
         // Render leaderboard from Supabase
         async function renderLeaderboard() {
             const container = document.getElementById('leaderboardList');
+            if (!container) {
+                console.warn('Leaderboard container not found');
+                return;
+            }
             
             if (!supabase) {
-                container.innerHTML = '<div class="empty-leaderboard">⚠️ Supabase connection not ready. Refresh page.</div>';
+                container.innerHTML = '<div class="empty-leaderboard">⚠️ Leaderboard unavailable (offline mode). Add sets locally to get started!</div>';
                 return;
             }
             
@@ -1992,16 +2053,21 @@
                 // Show loading state
                 container.innerHTML = '<div class="empty-leaderboard">Loading leaderboard... ⏳</div>';
                 
-                // Fetch top 50 players from Supabase
+                // Fetch top 50 players from Supabase with timeout
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => controller.abort(), 10000);
+                
                 const { data: players, error } = await supabase
                     .from('players')
                     .select('*')
                     .order('total', { ascending: false })
                     .limit(50);
 
+                clearTimeout(timeoutId);
+
                 if (error) {
-                    console.error('Leaderboard fetch error:', error);
-                    container.innerHTML = '<div class="empty-leaderboard">Error loading leaderboard. Check your connection.</div>';
+                    console.warn('Leaderboard fetch error:', error.message);
+                    container.innerHTML = '<div class="empty-leaderboard">⚠️ Leaderboard loading failed. Try again later.</div>';
                     return;
                 }
 
@@ -2025,7 +2091,7 @@
                         <div class="leaderboard-item"${yourHighlight}>
                             <div class="leaderboard-rank ${rankClass}">${medal}</div>
                             <div class="leaderboard-info">
-                                <div class="leaderboard-name">${person.name}${isYou ? ' ⭐ (You)' : ''}</div>
+                                <div class="leaderboard-name">${escapeHtml(person.name)}${isYou ? ' ⭐ (You)' : ''}</div>
                                 <div class="leaderboard-count" style="font-size: 0.85em; color: rgba(255, 215, 0, 0.7);">Updated: ${new Date(person.updated_at).toLocaleTimeString()}</div>
                             </div>
                             <div class="leaderboard-packs">${person.total}</div>
@@ -2034,25 +2100,43 @@
                 }).join('');
             } catch (err) {
                 console.error('Leaderboard render error:', err);
-                container.innerHTML = '<div class="empty-leaderboard">Connection failed. Refresh to try again.</div>';
+                container.innerHTML = '<div class="empty-leaderboard">⚠️ Connection failed. Try refreshing.</div>';
             }
+        }
+
+        // Helper to prevent XSS
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
         }
 
         // Copy share link
         function copyShareLink(event) {
-            const shareLink = generateShareLink();
-            document.getElementById('shareLink').value = shareLink;
-            
-            navigator.clipboard.writeText(shareLink).then(() => {
-                const btn = event.target;
-                const originalText = btn.textContent;
-                btn.textContent = 'Copied! ✓';
-                setTimeout(() => {
-                    btn.textContent = originalText;
-                }, 2000);
-            }).catch(() => {
-                alert('Copy failed. Link: ' + shareLink);
-            });
+            try {
+                const shareLink = generateShareLink();
+                const shareLinkInput = document.getElementById('shareLink');
+                if (shareLinkInput) {
+                    shareLinkInput.value = shareLink;
+                }
+                
+                navigator.clipboard.writeText(shareLink)
+                    .then(() => {
+                        const btn = event.target;
+                        const originalText = btn.textContent;
+                        btn.textContent = 'Copied! ✓';
+                        setTimeout(() => {
+                            btn.textContent = originalText;
+                        }, 2000);
+                    })
+                    .catch((err) => {
+                        console.warn('Clipboard copy failed:', err.message);
+                        alert('Copy failed: ' + shareLink);
+                    });
+            } catch (err) {
+                console.error('Share link error:', err);
+                alert('Error generating share link: ' + err.message);
+            }
         }
 
         // Open leaderboard modal
@@ -2292,8 +2376,47 @@
             }
         }
 
-        // Initialize
-        (async () => {
+        function setupThemeDropdownListeners() {
+            const themeBtn = document.querySelector('.theme-btn');
+            const dropdownElement = document.getElementById('themeDropdown');
+            
+            if (!themeBtn || !dropdownElement) {
+                console.warn('Theme button or dropdown not found');
+                return;
+            }
+            
+            let hoverTimeout;
+            
+            // Show dropdown on button hover
+            themeBtn.addEventListener('mouseenter', function() {
+                clearTimeout(hoverTimeout);
+                renderThemeSelector();
+                dropdownElement.classList.add('active');
+            });
+            
+            // Keep dropdown visible when hovering over it
+            dropdownElement.addEventListener('mouseenter', function() {
+                clearTimeout(hoverTimeout);
+                dropdownElement.classList.add('active');
+            });
+            
+            // Hide dropdown when leaving button
+            themeBtn.addEventListener('mouseleave', function() {
+                hoverTimeout = setTimeout(() => {
+                    dropdownElement.classList.remove('active');
+                }, 200);
+            });
+            
+            // Hide dropdown when leaving dropdown
+            dropdownElement.addEventListener('mouseleave', function() {
+                hoverTimeout = setTimeout(() => {
+                    dropdownElement.classList.remove('active');
+                }, 200);
+            });
+        }
+
+        // Initialize app
+        async function initializeApp() {
             try {
                 console.log('🎮 Initializing Pokémon Pack Counter...');
                 
@@ -2331,48 +2454,28 @@
                 applyTheme(getThemeStorage());
                 renderThemeSelector();
                 
+                // Set up event listeners now that DOM is ready
+                setupEventListeners();
+                setupThemeDropdownListeners();
+                
                 console.log('✅ App initialized successfully!');
             } catch (err) {
                 console.error('Initialization error:', err);
+                // Still try to render even if init failed
+                render();
+                setupEventListeners();
             }
-        })();
-
-        // Hover functionality for theme dropdown
-        const themeBtn = document.querySelector('.theme-btn');
-        const dropdownElement = document.getElementById('themeDropdown');
-        
-        if (themeBtn && dropdownElement) {
-            let hoverTimeout;
-            
-            // Show dropdown on button hover
-            themeBtn.addEventListener('mouseenter', function() {
-                clearTimeout(hoverTimeout);
-                renderThemeSelector();
-                dropdownElement.classList.add('active');
-            });
-            
-            // Keep dropdown visible when hovering over it
-            dropdownElement.addEventListener('mouseenter', function() {
-                clearTimeout(hoverTimeout);
-                dropdownElement.classList.add('active');
-            });
-            
-            // Hide dropdown when leaving button
-            themeBtn.addEventListener('mouseleave', function() {
-                hoverTimeout = setTimeout(() => {
-                    dropdownElement.classList.remove('active');
-                }, 200);
-            });
-            
-            // Hide dropdown when leaving dropdown
-            dropdownElement.addEventListener('mouseleave', function() {
-                hoverTimeout = setTimeout(() => {
-                    dropdownElement.classList.remove('active');
-                }, 200);
-            });
         }
 
-        // Close dropdown when clicking outside
+        // Start initialization when DOM is ready
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initializeApp);
+        } else {
+            // DOM is already loaded
+            initializeApp();
+        }
+
+        // Backup: Also try to close theme dropdown when clicking outside
         document.addEventListener('click', function(e) {
             const dropdown = document.getElementById('themeDropdown');
             const themeBtn = document.querySelector('.theme-btn');
@@ -2387,5 +2490,4 @@
     <div id="themeDropdown" class="theme-dropdown"></div>
 
 </body>
-</html>
 </html>
