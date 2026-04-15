@@ -2104,6 +2104,382 @@
             }
         }
 
+        // ============ THEME SYSTEM ============
+        const THEMES = [
+            {
+                id: 'theme-dark',
+                name: '🌙 Dark Mode',
+                class: 'theme-dark',
+                unlockAt: 0,
+                free: true,
+                colors: ['#ffd700', '#ff6b35']
+            },
+            {
+                id: 'theme-palkia',
+                name: '🌊 Palkia Legend',
+                class: 'theme-palkia',
+                unlockAt: 0,
+                free: true,
+                colors: ['#0099ff', '#ff00ff']
+            },
+            {
+                id: 'theme-midnight-dragon',
+                name: '🐉 Midnight Dragon',
+                class: 'theme-midnight-dragon',
+                unlockAt: 10,
+                free: false,
+                colors: ['#1a1a4d', '#8b00ff']
+            },
+            {
+                id: 'theme-dialga',
+                name: '⏰ Dialga Timeless',
+                class: 'theme-dialga',
+                unlockAt: 20,
+                free: false,
+                colors: ['#c0c0c0', '#1e90ff']
+            },
+            {
+                id: 'theme-fire-blaze',
+                name: '🔥 Fire Blaze',
+                class: 'theme-fire-blaze',
+                unlockAt: 20,
+                free: false,
+                colors: ['#ff1744', '#ffaa00']
+            },
+            {
+                id: 'theme-rayquaza',
+                name: '🌪️ Rayquaza Skies',
+                class: 'theme-rayquaza',
+                unlockAt: 40,
+                free: false,
+                colors: ['#00aa44', '#44ff00']
+            },
+            {
+                id: 'theme-ocean-wave',
+                name: '🌊 Ocean Wave',
+                class: 'theme-ocean-wave',
+                unlockAt: 30,
+                free: false,
+                colors: ['#00bfff', '#0066cc']
+            },
+            {
+                id: 'theme-groudon',
+                name: '🌋 Groudon Magma',
+                class: 'theme-groudon',
+                unlockAt: 60,
+                free: false,
+                colors: ['#ff4500', '#8b0000']
+            },
+            {
+                id: 'theme-crystal-magic',
+                name: '✨ Crystal Magic',
+                class: 'theme-crystal-magic',
+                unlockAt: 40,
+                free: false,
+                colors: ['#ff00ff', '#00ffff']
+            },
+            {
+                id: 'theme-kyogre',
+                name: '🌊 Kyogre Abyss',
+                class: 'theme-kyogre',
+                unlockAt: 80,
+                free: false,
+                colors: ['#001a99', '#0066ff']
+            },
+            {
+                id: 'theme-sunset-glow',
+                name: '🌅 Sunset Glow',
+                class: 'theme-sunset-glow',
+                unlockAt: 50,
+                free: false,
+                colors: ['#ff6b00', '#ff00aa']
+            },
+            {
+                id: 'theme-arceus',
+                name: '⭐ Arceus Divine',
+                class: 'theme-arceus',
+                unlockAt: 100,
+                free: false,
+                colors: ['#ffff00', '#ffffff']
+            },
+            {
+                id: 'theme-forest-spirits',
+                name: '🌲 Forest Spirits',
+                class: 'theme-forest-spirits',
+                unlockAt: 75,
+                free: false,
+                colors: ['#00aa44', '#ffff00']
+            }
+        ];
+
+        function getThemeStorage() {
+            return localStorage.getItem('pokemonTheme') || 'theme-dark';
+        }
+
+        function setThemeStorage(themeId) {
+            localStorage.setItem('pokemonTheme', themeId);
+        }
+
+        function applyTheme(themeId) {
+            // Remove all theme classes
+            document.body.classList.remove(...THEMES.map(t => t.class));
+            
+            // Add the new theme class
+            const theme = THEMES.find(t => t.id === themeId);
+            if (theme) {
+                document.body.classList.add(theme.class);
+                setThemeStorage(themeId);
+            }
+        }
+
+        function isThemeUnlocked(unlockAt, free) {
+            if (free) return true;
+            const sets = loadSets();
+            const total = Object.values(sets).reduce((sum, item) => sum + (item.count || 0), 0);
+            return total >= unlockAt;
+        }
+
+        function renderThemeSelector() {
+            const dropdown = document.getElementById('themeDropdown');
+            if (!dropdown) return;
+            
+            const sets = loadSets();
+            const totalPacks = Object.values(sets).reduce((sum, item) => sum + (item.count || 0), 0);
+            const currentTheme = getThemeStorage();
+
+            dropdown.innerHTML = THEMES.map(theme => {
+                const isUnlocked = isThemeUnlocked(theme.unlockAt, theme.free);
+                const isActive = currentTheme === theme.id;
+                
+                let statusText = isUnlocked ? '✅ Unlocked' : `🔒 ${theme.unlockAt - totalPacks} packs to unlock`;
+
+                return `
+                    <div class="theme-dropdown-item ${isActive ? 'active' : ''} ${!isUnlocked ? 'locked' : ''}" 
+                         onclick="${isUnlocked ? `selectTheme('${theme.id}')` : 'return false;'}"
+                         style="--primary-color: ${theme.colors[0]};">
+                        <div class="theme-color-preview" style="background: linear-gradient(135deg, ${theme.colors[0]} 0%, ${theme.colors[1]} 100%);"></div>
+                        <div class="theme-dropdown-label">
+                            <div class="theme-dropdown-name">${theme.name}</div>
+                            <div class="theme-dropdown-status">${statusText}</div>
+                        </div>
+                        ${isActive ? '<div style="font-size: 1.2em;">✓</div>' : ''}
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function openThemeSelector() {
+            renderThemeSelector();
+            const dropdown = document.getElementById('themeDropdown');
+            if (dropdown) {
+                dropdown.classList.toggle('active');
+            }
+        }
+
+        function closeThemeSelector() {
+            const dropdown = document.getElementById('themeDropdown');
+            if (dropdown) {
+                dropdown.classList.remove('active');
+            }
+        }
+
+        function selectTheme(themeId) {
+            const theme = THEMES.find(t => t.id === themeId);
+            if (theme && isThemeUnlocked(theme.unlockAt, theme.free)) {
+                applyTheme(themeId);
+                renderThemeSelector();
+                closeThemeSelector();
+            }
+        }
+
+        // ============ THEME SYSTEM ============
+        const THEMES = [
+            {
+                id: 'theme-dark',
+                name: '🌙 Dark Mode',
+                class: 'theme-dark',
+                unlockAt: 0,
+                free: true,
+                colors: ['#ffd700', '#ff6b35']
+            },
+            {
+                id: 'theme-palkia',
+                name: '🌊 Palkia Legend',
+                class: 'theme-palkia',
+                unlockAt: 0,
+                free: true,
+                colors: ['#0099ff', '#ff00ff']
+            },
+            {
+                id: 'theme-midnight-dragon',
+                name: '🐉 Midnight Dragon',
+                class: 'theme-midnight-dragon',
+                unlockAt: 10,
+                free: false,
+                colors: ['#1a1a4d', '#8b00ff']
+            },
+            {
+                id: 'theme-dialga',
+                name: '⏰ Dialga Timeless',
+                class: 'theme-dialga',
+                unlockAt: 20,
+                free: false,
+                colors: ['#c0c0c0', '#1e90ff']
+            },
+            {
+                id: 'theme-fire-blaze',
+                name: '🔥 Fire Blaze',
+                class: 'theme-fire-blaze',
+                unlockAt: 20,
+                free: false,
+                colors: ['#ff1744', '#ffaa00']
+            },
+            {
+                id: 'theme-rayquaza',
+                name: '🌪️ Rayquaza Skies',
+                class: 'theme-rayquaza',
+                unlockAt: 40,
+                free: false,
+                colors: ['#00aa44', '#44ff00']
+            },
+            {
+                id: 'theme-ocean-wave',
+                name: '🌊 Ocean Wave',
+                class: 'theme-ocean-wave',
+                unlockAt: 30,
+                free: false,
+                colors: ['#00bfff', '#0066cc']
+            },
+            {
+                id: 'theme-groudon',
+                name: '🌋 Groudon Magma',
+                class: 'theme-groudon',
+                unlockAt: 60,
+                free: false,
+                colors: ['#ff4500', '#8b0000']
+            },
+            {
+                id: 'theme-crystal-magic',
+                name: '✨ Crystal Magic',
+                class: 'theme-crystal-magic',
+                unlockAt: 40,
+                free: false,
+                colors: ['#ff00ff', '#00ffff']
+            },
+            {
+                id: 'theme-kyogre',
+                name: '🌊 Kyogre Abyss',
+                class: 'theme-kyogre',
+                unlockAt: 80,
+                free: false,
+                colors: ['#001a99', '#0066ff']
+            },
+            {
+                id: 'theme-sunset-glow',
+                name: '🌅 Sunset Glow',
+                class: 'theme-sunset-glow',
+                unlockAt: 50,
+                free: false,
+                colors: ['#ff6b00', '#ff00aa']
+            },
+            {
+                id: 'theme-arceus',
+                name: '⭐ Arceus Divine',
+                class: 'theme-arceus',
+                unlockAt: 100,
+                free: false,
+                colors: ['#ffff00', '#ffffff']
+            },
+            {
+                id: 'theme-forest-spirits',
+                name: '🌲 Forest Spirits',
+                class: 'theme-forest-spirits',
+                unlockAt: 75,
+                free: false,
+                colors: ['#00aa44', '#ffff00']
+            }
+        ];
+
+        function getThemeStorage() {
+            return localStorage.getItem('pokemonTheme') || 'theme-dark';
+        }
+
+        function setThemeStorage(themeId) {
+            localStorage.setItem('pokemonTheme', themeId);
+        }
+
+        function applyTheme(themeId) {
+            // Remove all theme classes
+            document.body.classList.remove(...THEMES.map(t => t.class));
+            
+            // Add the new theme class
+            const theme = THEMES.find(t => t.id === themeId);
+            if (theme) {
+                document.body.classList.add(theme.class);
+                setThemeStorage(themeId);
+            }
+        }
+
+        function isThemeUnlocked(unlockAt, free) {
+            if (free) return true;
+            const sets = loadSets();
+            const total = Object.values(sets).reduce((sum, item) => sum + (item.count || 0), 0);
+            return total >= unlockAt;
+        }
+
+        function renderThemeSelector() {
+            const dropdown = document.getElementById('themeDropdown');
+            if (!dropdown) return;
+            
+            const sets = loadSets();
+            const totalPacks = Object.values(sets).reduce((sum, item) => sum + (item.count || 0), 0);
+            const currentTheme = getThemeStorage();
+
+            dropdown.innerHTML = THEMES.map(theme => {
+                const isUnlocked = isThemeUnlocked(theme.unlockAt, theme.free);
+                const isActive = currentTheme === theme.id;
+                
+                let statusText = isUnlocked ? '✅ Unlocked' : `🔒 ${theme.unlockAt - totalPacks} packs to unlock`;
+
+                return `
+                    <div class="theme-dropdown-item ${isActive ? 'active' : ''} ${!isUnlocked ? 'locked' : ''}" 
+                         onclick="${isUnlocked ? `selectTheme('${theme.id}')` : 'return false;'}"
+                         style="--primary-color: ${theme.colors[0]};">
+                        <div class="theme-color-preview" style="background: linear-gradient(135deg, ${theme.colors[0]} 0%, ${theme.colors[1]} 100%);"></div>
+                        <div class="theme-dropdown-label">
+                            <div class="theme-dropdown-name">${theme.name}</div>
+                            <div class="theme-dropdown-status">${statusText}</div>
+                        </div>
+                        ${isActive ? '<div style="font-size: 1.2em;">✓</div>' : ''}
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function openThemeSelector() {
+            renderThemeSelector();
+            const dropdown = document.getElementById('themeDropdown');
+            if (dropdown) {
+                dropdown.classList.toggle('active');
+            }
+        }
+
+        function closeThemeSelector() {
+            const dropdown = document.getElementById('themeDropdown');
+            if (dropdown) {
+                dropdown.classList.remove('active');
+            }
+        }
+
+        function selectTheme(themeId) {
+            const theme = THEMES.find(t => t.id === themeId);
+            if (theme && isThemeUnlocked(theme.unlockAt, theme.free)) {
+                applyTheme(themeId);
+                renderThemeSelector();
+                closeThemeSelector();
+            }
+        }
+
         // Initialize
         (async () => {
             try {
@@ -2138,6 +2514,10 @@
                 checkFriendShare();
                 await fetchPokemons();
                 render();
+                
+                // Apply theme
+                applyTheme(getThemeStorage());
+                renderThemeSelector();
                 
                 console.log('✅ App initialized successfully!');
             } catch (err) {
@@ -2377,14 +2757,6 @@
                 closeThemeSelector();
             }
         });
-
-        // Apply theme on page load
-        applyTheme(getThemeStorage());
-        
-        // Initialize theme dropdown after a short delay to ensure DOM is ready
-        setTimeout(() => {
-            renderThemeSelector();
-        }, 100);
     </script>
 
     <!-- Theme Dropdown -->
