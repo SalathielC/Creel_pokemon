@@ -1625,7 +1625,7 @@
                 
                 const card = document.createElement('div');
                 card.className = 'set-card new';
-                card.dataset.setName = setName;
+                card.setAttribute('data-set-name', setName);
                 
                 let imageHTML = `<div class="set-image-placeholder">🎴</div>`;
                 
@@ -1684,8 +1684,8 @@
                 sets[setName].count = (sets[setName].count || 0) + 1;
                 saveSets(sets);
                 
-                // Find the card element using CSS.escape for safety
-                const escapedName = CSS.escape(setName);
+                // Find the card element using safe string escaping for browser compatibility
+                const escapedName = setName.replace(/"/g, '\\"');
                 const card = document.querySelector(`[data-set-name="${escapedName}"]`);
                 if (card) {
                     // Update total count
@@ -1764,8 +1764,8 @@
                 sets[setName].count--;
                 saveSets(sets);
                 
-                // Find the card element using CSS.escape for safety
-                const escapedName = CSS.escape(setName);
+                // Find the card element using safe string escaping for browser compatibility
+                const escapedName = setName.replace(/"/g, '\\"');
                 const card = document.querySelector(`[data-set-name="${escapedName}"]`);
                 if (card) {
                     // Update total count
@@ -1856,7 +1856,7 @@
                 });
 
                 // Allow Enter key to add set
-                setNameInput.addEventListener('keypress', (e) => {
+                setNameInput.addEventListener('keydown', (e) => {
                     if (e.key === 'Enter') addSet();
                 });
             }
@@ -2436,10 +2436,8 @@
                     } else {
                         savedName = 'Anonymous ' + Math.floor(Math.random() * 10000);
                     }
-                    setPlayerName(savedName);
-                } else {
-                    currentPlayerName = savedName;
                 }
+                setPlayerName(savedName); // ALWAYS set it
                 console.log('✅ Player Name:', currentPlayerName);
                 
                 // Sync to Supabase with player info
