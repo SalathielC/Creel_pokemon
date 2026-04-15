@@ -7,6 +7,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;500;600;700;800;900&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         * {
             margin: 0;
@@ -1424,10 +1425,21 @@
     </div>
 
     <script>
+        // ===== SUPABASE INITIALIZATION =====
+        const SUPABASE_URL = "https://viejiddhyrvedgeijxec.supabase.co";
+        const SUPABASE_KEY = "sb_publishable_aOhWOkPVQjylLcaCDDuanA_Rw2Knjhy";
+        const { createClient } = window.supabase;
+        const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
+
+        // ===== LOCAL STORAGE KEYS =====
         const STORAGE_KEY = 'pokemonSets';
         const TCG_API = 'https://api.pokemontcg.io/v2/sets';
+        const PLAYER_ID_KEY = 'pokemonPlayerId';
+        const PLAYER_NAME_KEY = 'pokemonPlayerName';
         let allSets = [];
         let debounceTimer;
+        let currentPlayerId = null;
+        let currentPlayerName = null;
 
         // Validate image URL
         function isValidImageUrl(url) {
@@ -1661,6 +1673,9 @@
                     // Update theme selector to reflect new unlocks
                     renderThemeSelector();
                     
+                    // Sync to Supabase
+                    syncPlayerToSupabase();
+                    
                     // Trigger smooth animation (only count, no full card)
                     countElement.classList.remove('counting');
                     void countElement.offsetWidth; // Force reflow to restart animation
@@ -1724,6 +1739,9 @@
                     // Update theme selector to reflect new unlocks
                     renderThemeSelector();
                     
+                    // Sync to Supabase
+                    syncPlayerToSupabase();
+                    
                     // Trigger animation
                     countElement.classList.remove('counting');
                     void countElement.offsetWidth;
@@ -1773,6 +1791,60 @@
             if (e.key === 'Enter') addSet();
         });
 
+        // ===== PLAYER IDENTITY SYSTEM =====
+        function generatePlayerId() {
+            return 'player_' + Math.random().toString(36).substr(2, 16);
+        }
+
+        function getOrCreatePlayerId() {
+            let playerId = localStorage.getItem(PLAYER_ID_KEY);
+            if (!playerId) {
+                playerId = generatePlayerId();
+                localStorage.setItem(PLAYER_ID_KEY, playerId);
+            }
+            return playerId;
+        }
+
+        function getPlayerName() {
+            return localStorage.getItem(PLAYER_NAME_KEY) || 'Anonymous Player';
+        }
+
+        function setPlayerName(name) {
+            localStorage.setItem(PLAYER_NAME_KEY, name);
+            currentPlayerName = name;
+        }
+
+        async function promptForPlayerName() {
+            if (!localStorage.getItem(PLAYER_NAME_KEY)) {
+                const name = prompt('Enter your player name:', 'Player');
+                if (name && name.trim()) {
+                    setPlayerName(name.trim());
+                } else {
+                    setPlayerName('Anonymous ' + Math.floor(Math.random() * 10000));
+                }
+            }
+        }
+
+        async function syncPlayerToSupabase() {
+            const sets = loadSets();
+            const totalPacks = Object.values(sets).reduce((sum, item) => sum + (item.count || 0), 0);
+            
+            try {
+                const { data, error } = await supabase.from('players').upsert({
+                    id: currentPlayerId,
+                    name: currentPlayerName,
+                    total: totalPacks,
+                    updated_at: new Date().toISOString()
+                }).select();
+
+                if (error) {
+                    console.error('Supabase sync error:', error);
+                }
+            } catch (err) {
+                console.error('Failed to sync to Supabase:', err);
+            }
+        }
+
         // ===== LEADERBOARD & SHARING FUNCTIONS =====
         
         const FRIENDS_KEY = 'pokemonFriends';
@@ -1806,9 +1878,8 @@
 
         // Generate shareable link
         function generateShareLink() {
-            const userId = getOrCreateUserId();
             const baseUrl = window.location.origin + window.location.pathname;
-            return baseUrl + '?friend=' + userId;
+            return baseUrl + '?player=' + currentPlayerId + '&name=' + encodeURIComponent(currentPlayerName);
         }
 
         // Get stats for leaderboard
@@ -1825,33 +1896,41 @@
             };
         }
 
-        // Add friend to leaderboard
-        function addFriend() {
+        // Add friend to leaderboard (search player by name)
+        async function addFriend() {
             const input = document.getElementById('friendShareCode').value.trim();
             if (!input) {
-                alert('Please enter a friend code or name');
+                alert('Enter a player name to find them on the leaderboard!');
                 return;
             }
 
-            const friends = loadFriends();
-            
-            // Check if already added
-            if (friends.some(f => f.id === input || f.name === input)) {
-                alert('This friend is already on your leaderboard!');
-                return;
+            try {
+                const { data: foundPlayers, error } = await supabase
+                    .from('players')
+                    .select('*')
+                    .ilike('name', `%${input}%`)
+                    .limit(5);
+
+                if (error) throw error;
+
+                if (!foundPlayers || foundPlayers.length === 0) {
+                    alert('No players found with that name. Check the leaderboard!');
+                    return;
+                }
+
+                if (foundPlayers.length === 1) {
+                    alert('Found ' + foundPlayers[0].name + '! They are on the global leaderboard.');
+                } else {
+                    const names = foundPlayers.map(p => p.name).join(', ');
+                    alert('Found multiple players: ' + names);
+                }
+
+                document.getElementById('friendShareCode').value = '';
+                renderLeaderboard();
+            } catch (err) {
+                console.error('Friend search error:', err);
+                alert('Error searching for player. Try again.');
             }
-
-            // Add friend
-            friends.push({
-                id: input,
-                name: input,
-                stats: { total: 0, setCount: 0 },
-                dateAdded: new Date().toISOString()
-            });
-
-            saveFriends(friends);
-            document.getElementById('friendShareCode').value = '';
-            renderLeaderboard();
         }
 
         // Remove friend from leaderboard
@@ -1864,55 +1943,58 @@
             }
         }
 
-        // Render leaderboard
-        function renderLeaderboard() {
-            const friends = loadFriends();
+        // Render leaderboard from Supabase
+        async function renderLeaderboard() {
             const container = document.getElementById('leaderboardList');
-            const userId = getOrCreateUserId();
+            
+            try {
+                // Show loading state
+                container.innerHTML = '<div class="empty-leaderboard">Loading leaderboard... ⏳</div>';
+                
+                // Fetch top 50 players from Supabase
+                const { data: players, error } = await supabase
+                    .from('players')
+                    .select('*')
+                    .order('total', { ascending: false })
+                    .limit(50);
 
-            // Get your stats
-            const yourStats = getStats();
-            const leaderboard = [
-                {
-                    id: userId,
-                    name: getUserName(),
-                    stats: yourStats,
-                    isYou: true
-                },
-                ...friends.map(f => ({
-                    ...f,
-                    isYou: false
-                }))
-            ];
+                if (error) {
+                    console.error('Leaderboard fetch error:', error);
+                    container.innerHTML = '<div class="empty-leaderboard">Error loading leaderboard. Check your connection.</div>';
+                    return;
+                }
 
-            // Sort by total packs
-            leaderboard.sort((a, b) => (b.stats.total || 0) - (a.stats.total || 0));
+                if (!players || players.length === 0) {
+                    container.innerHTML = '<div class="empty-leaderboard">No players yet. Be the first! 🚀</div>';
+                    return;
+                }
 
-            if (leaderboard.length === 1) {
-                container.innerHTML = '<div class="empty-leaderboard">Invite a friend to start competing! 🎉</div>';
-                return;
-            }
+                // Render leaderboard with multiplayer data
+                container.innerHTML = players.map((person, index) => {
+                    let medal = '👤';
+                    if (index === 0) medal = '🥇';
+                    else if (index === 1) medal = '🥈';
+                    else if (index === 2) medal = '🥉';
 
-            container.innerHTML = leaderboard.map((person, index) => {
-                let medal = '👤';
-                if (index === 0) medal = '🥇';
-                else if (index === 1) medal = '🥈';
-                else if (index === 2) medal = '🥉';
+                    const rankClass = index === 0 ? 'first' : index === 1 ? 'second' : index === 2 ? 'third' : '';
+                    const isYou = person.id === currentPlayerId;
+                    const yourHighlight = isYou ? ' style="background: rgba(255, 215, 0, 0.15);"' : '';
 
-                const rankClass = index === 0 ? 'first' : index === 1 ? 'second' : index === 2 ? 'third' : '';
-
-                return `
-                    <div class="leaderboard-item">
-                        <div class="leaderboard-rank ${rankClass}">${medal}</div>
-                        <div class="leaderboard-info">
-                            <div class="leaderboard-name">${person.name}${person.isYou ? ' (You)' : ''}</div>
-                            <div class="leaderboard-count">${person.stats.setCount || 0} sets tracked</div>
+                    return `
+                        <div class="leaderboard-item"${yourHighlight}>
+                            <div class="leaderboard-rank ${rankClass}">${medal}</div>
+                            <div class="leaderboard-info">
+                                <div class="leaderboard-name">${person.name}${isYou ? ' ⭐ (You)' : ''}</div>
+                                <div class="leaderboard-count" style="font-size: 0.85em; color: rgba(255, 215, 0, 0.7);">Updated: ${new Date(person.updated_at).toLocaleTimeString()}</div>
+                            </div>
+                            <div class="leaderboard-packs">${person.total}</div>
                         </div>
-                        <div class="leaderboard-packs">${person.stats.total || 0}</div>
-                        ${!person.isYou ? `<button class="btn-delete" onclick="removeFriend('${person.id}')">✕</button>` : ''}
-                    </div>
-                `;
-            }).join('');
+                    `;
+                }).join('');
+            } catch (err) {
+                console.error('Leaderboard render error:', err);
+                container.innerHTML = '<div class="empty-leaderboard">Connection failed. Refresh to try again.</div>';
+            }
         }
 
         // Copy share link
@@ -1933,10 +2015,11 @@
         }
 
         // Open leaderboard modal
-        function openLeaderboard() {
+        async function openLeaderboard() {
             document.getElementById('leaderboardModal').classList.add('active');
             document.getElementById('shareLink').value = generateShareLink();
-            renderLeaderboard();
+            // Refresh leaderboard from Supabase when modal opens
+            await renderLeaderboard();
         }
 
         // Close leaderboard modal
@@ -1981,8 +2064,20 @@
         }
 
         // Initialize
-        checkFriendShare();
-        fetchPokemons().then(() => render());
+        (async () => {
+            // Set up player identity
+            currentPlayerId = getOrCreatePlayerId();
+            await promptForPlayerName();
+            currentPlayerName = getPlayerName();
+            
+            // Sync to Supabase with player info
+            await syncPlayerToSupabase();
+            
+            // Load sets and render
+            checkFriendShare();
+            await fetchPokemons();
+            render();
+        })();
 
         // ============ THEME SYSTEM ============
         const THEMES = [
