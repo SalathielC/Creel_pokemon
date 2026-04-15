@@ -1428,8 +1428,32 @@
         // ===== SUPABASE INITIALIZATION =====
         const SUPABASE_URL = "https://viejiddhyrvedgeijxec.supabase.co";
         const SUPABASE_KEY = "sb_publishable_aOhWOkPVQjylLcaCDDuanA_Rw2Knjhy";
-        const { createClient } = window.supabase;
-        const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
+        let supabase = null;
+
+        // Wait for Supabase to load, then initialize
+        async function initSupabase() {
+            if (supabase) return; // Already initialized
+            
+            // Wait for Supabase library to load
+            let attempts = 0;
+            while (!window.supabase && attempts < 50) {
+                await new Promise(r => setTimeout(r, 100));
+                attempts++;
+            }
+            
+            if (!window.supabase) {
+                console.error('Supabase library failed to load');
+                return;
+            }
+            
+            try {
+                const { createClient } = window.supabase;
+                supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
+                console.log('✅ Supabase initialized successfully');
+            } catch (err) {
+                console.error('Failed to initialize Supabase:', err);
+            }
+        }
 
         // ===== LOCAL STORAGE KEYS =====
         const STORAGE_KEY = 'pokemonSets';
@@ -1826,6 +1850,11 @@
         }
 
         async function syncPlayerToSupabase() {
+            if (!supabase || !currentPlayerId || !currentPlayerName) {
+                console.warn('Supabase not ready or player info missing');
+                return;
+            }
+            
             const sets = loadSets();
             const totalPacks = Object.values(sets).reduce((sum, item) => sum + (item.count || 0), 0);
             
@@ -1839,6 +1868,8 @@
 
                 if (error) {
                     console.error('Supabase sync error:', error);
+                } else {
+                    console.log('✅ Synced to Supabase:', { id: currentPlayerId, name: currentPlayerName, total: totalPacks });
                 }
             } catch (err) {
                 console.error('Failed to sync to Supabase:', err);
@@ -1904,6 +1935,11 @@
                 return;
             }
 
+            if (!supabase) {
+                alert('Supabase not connected. Please refresh the page.');
+                return;
+            }
+
             try {
                 const { data: foundPlayers, error } = await supabase
                     .from('players')
@@ -1946,6 +1982,11 @@
         // Render leaderboard from Supabase
         async function renderLeaderboard() {
             const container = document.getElementById('leaderboardList');
+            
+            if (!supabase) {
+                container.innerHTML = '<div class="empty-leaderboard">⚠️ Supabase connection not ready. Refresh page.</div>';
+                return;
+            }
             
             try {
                 // Show loading state
@@ -2065,18 +2106,43 @@
 
         // Initialize
         (async () => {
-            // Set up player identity
-            currentPlayerId = getOrCreatePlayerId();
-            await promptForPlayerName();
-            currentPlayerName = getPlayerName();
-            
-            // Sync to Supabase with player info
-            await syncPlayerToSupabase();
-            
-            // Load sets and render
-            checkFriendShare();
-            await fetchPokemons();
-            render();
+            try {
+                console.log('🎮 Initializing Pokémon Pack Counter...');
+                
+                // Initialize Supabase first
+                await initSupabase();
+                
+                // Set up player identity
+                currentPlayerId = getOrCreatePlayerId();
+                console.log('✅ Player ID:', currentPlayerId);
+                
+                // Get or prompt for player name
+                let savedName = localStorage.getItem(PLAYER_NAME_KEY);
+                if (!savedName) {
+                    const promptName = prompt('👤 Enter your player name:', 'Player');
+                    if (promptName && promptName.trim()) {
+                        savedName = promptName.trim();
+                    } else {
+                        savedName = 'Anonymous ' + Math.floor(Math.random() * 10000);
+                    }
+                    setPlayerName(savedName);
+                } else {
+                    currentPlayerName = savedName;
+                }
+                console.log('✅ Player Name:', currentPlayerName);
+                
+                // Sync to Supabase with player info
+                await syncPlayerToSupabase();
+                
+                // Load sets and render
+                checkFriendShare();
+                await fetchPokemons();
+                render();
+                
+                console.log('✅ App initialized successfully!');
+            } catch (err) {
+                console.error('Initialization error:', err);
+            }
         })();
 
         // ============ THEME SYSTEM ============
