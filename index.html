@@ -1638,11 +1638,11 @@
                     <div class="set-name">${setName}</div>
                     <div class="set-count">${count}</div>
                     <div class="set-actions">
-                        <button class="btn-increment" onclick="incrementSet('${setName.replace(/'/g, "\\'")}')">➕</button>
-                        <button class="btn-decrement" onclick="decrementSet('${setName.replace(/'/g, "\\'")}')">➖</button>
+                        <button class="btn-increment" data-action="increment">➕</button>
+                        <button class="btn-decrement" data-action="decrement">➖</button>
                     </div>
                     <div class="set-actions-secondary">
-                        <button class="btn-delete" onclick="deleteSet('${setName.replace(/'/g, "\\'")}')">Remove Set</button>
+                        <button class="btn-delete" data-action="delete">Remove Set</button>
                     </div>
                 `;
                 container.appendChild(card);
@@ -1858,6 +1858,25 @@
                 // Allow Enter key to add set
                 setNameInput.addEventListener('keydown', (e) => {
                     if (e.key === 'Enter') addSet();
+                });
+            }
+
+            // Event delegation for set card buttons
+            const container = document.getElementById('setsContainer');
+            if (container) {
+                container.addEventListener('click', (e) => {
+                    const button = e.target.closest('button[data-action]');
+                    if (!button) return;
+                    
+                    const card = button.closest('[data-set-name]');
+                    if (!card) return;
+                    
+                    const setName = card.getAttribute('data-set-name');
+                    const action = button.getAttribute('data-action');
+                    
+                    if (action === 'increment') incrementSet(setName);
+                    else if (action === 'decrement') decrementSet(setName);
+                    else if (action === 'delete') deleteSet(setName);
                 });
             }
         }
